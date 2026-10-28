@@ -29,7 +29,7 @@ router.post('/login', async (req, res) => {
   }
 });
 
-router.post('/auth/send-otp', async (req, res) => {
+router.post('/send-otp', async (req, res) => {
   try {
     await sendOtp(req, res);
   } catch (error) {
@@ -37,25 +37,13 @@ router.post('/auth/send-otp', async (req, res) => {
   }
 });
 
-router.post('/auth/verify-otp', async (req, res) => {
+router.post('/verify-otp', async (req, res) => {
   try {
     const result = otpVerifySchema.safeParse(req.body);
     if (!result.success) {
       return res.status(400).json({ message: result.error.errors[0].message });
     }
     await verifyOtp(req, res, result.data);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
-
-router.post('/auctions', authMiddleware, async (req, res) => {
-  try {
-    const result = createListingSchema.safeParse(req.body);
-    if (!result.success) {
-      return res.status(400).json({ message: result.error.errors[0].message });
-    }
-    await createListing(req, res, result.data);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

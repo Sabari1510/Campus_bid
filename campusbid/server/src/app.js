@@ -20,11 +20,26 @@ app.use(helmet());
 app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 100 }));
 app.use(cookieParser());
 
+import authRoutes from './routes/auth.routes.js';
+import auctionRoutes from './routes/auction.routes.js';
+import notificationRoutes from './routes/notification.routes.js';
+import questionRoutes from './routes/question.routes.js';
+import wantedRoutes from './routes/wanted.routes.js';
+import aiRoutes from './routes/ai.routes.js';
+
 // Health check
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 
 // Simple test route
 app.get('/api/test', (req, res) => res.json({ message: 'API working' }));
+
+// API Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/auctions', auctionRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/questions', questionRoutes);
+app.use('/api/wanted', wantedRoutes);
+app.use('/api/ai', aiRoutes);
 
 // Catch-all 404
 app.use((req, res) => {

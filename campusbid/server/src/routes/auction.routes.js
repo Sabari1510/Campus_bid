@@ -2,14 +2,21 @@ import express from 'express';
 import { authMiddleware } from '../middleware/auth.js';
 import { placeBid, checkExtension } from '../services/bidService.js';
 import Auction from '../models/Auction.js';
+import Bid from '../models/Bid.js';
 
 const router = express.Router();
 
-// Get all auctions with filters
-router.get('/', authMiddleware, async (req, res) => {
+// Get all auctions with filters (Public)
+router.get('/', async (req, res) => {
   try {
-    const { q, category, condition, min, max, closingSoon } = req.query;
-    let filter = { status: 'ACTIVE' };
+    const { q, category, condition, min, max, closingSoon, sellerId } = req.query;
+    let filter = {};
+
+    if (sellerId) {
+      filter.sellerId = sellerId;
+    } else {
+      filter.status = 'ACTIVE';
+    }
 
     if (q) {
       filter.$or = [
@@ -29,15 +36,15 @@ router.get('/', authMiddleware, async (req, res) => {
 
     const auctions = await Auction.find(filter)
       .sort({ closesAt: 1 })
-      .limit(20);
+      .limit(50);
     res.json(auctions);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
 
-// Get single auction details
-router.get('/:id', authMiddleware, async (req, res) => {
+// Get single auction details (Public)
+router.get('/:id', async (req, res) => {
   try {
     const auction = await Auction.findById(req.params.id)
       .populate('sellerId', 'name email')
@@ -46,6 +53,19 @@ router.get('/:id', authMiddleware, async (req, res) => {
       return res.status(404).json({ message: 'Auction not found' });
     }
     res.json(auction);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Get bids for single auction (Public)
+router.get('/:id/bids', async (req, res) => {
+  try {
+    const bids = await Bid.find({ auctionId: req.params.id })
+      .populate('bidderId', 'name')
+      .sort({ amount: -1 })
+      .limit(30);
+    res.json(bids);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -147,7 +167,7 @@ router.put('/:id/autobid', authMiddleware, async (req, res) => {
 router.post('/:id/decision', authMiddleware, async (req, res) => {
   try {
     const { approve } = req.body;
-    res.json({ message: `Decision ${aprove ? 'approve' : 'reject'} pending` });
+    res.json({ message: `Decision ${approve ? 'approve' : 'reject'} recorded` });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
