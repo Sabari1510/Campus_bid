@@ -1,5 +1,6 @@
 import express from 'express';
 import { authMiddleware } from '../middleware/auth.js';
+import { upload } from '../middleware/upload.js';
 import { placeBid, checkExtension } from '../services/bidService.js';
 import Auction from '../models/Auction.js';
 import Bid from '../models/Bid.js';
@@ -43,6 +44,18 @@ router.get('/', async (req, res) => {
   }
 });
 
+// My listings (auth required) — must be before /:id
+router.get('/mine', authMiddleware, async (req, res) => {
+  try {
+    const auctions = await Auction.find({ sellerId: req.user.userId })
+      .sort({ createdAt: -1 })
+      .limit(50);
+    res.json(auctions);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 // Get single auction details (Public)
 router.get('/:id', async (req, res) => {
   try {
@@ -72,9 +85,13 @@ router.get('/:id/bids', async (req, res) => {
 });
 
 // Create listing
-router.post('/', authMiddleware, async (req, res) => {
+router.post('/', authMiddleware, upload.array('photos', 3), async (req, res) => {
   try {
     const { title, description, category, condition, startPrice, minIncrement, closesAt } = req.body;
+
+    const photoUrls = req.files
+      ? req.files.map((f) => ({ url: `/uploads/${f.filename}`, publicId: f.filename }))
+      : [];
 
     const auction = await Auction.create({
       sellerId: req.user.userId,
@@ -82,7 +99,7 @@ router.post('/', authMiddleware, async (req, res) => {
       description,
       category,
       condition,
-      photos: [],
+      photos: photoUrls,
       startPrice: Number(startPrice),
       minIncrement: Number(minIncrement || 10),
       currentPrice: Number(startPrice),

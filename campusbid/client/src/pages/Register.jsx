@@ -1,84 +1,107 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
-const Register = () => {
+export default function Register() {
   const navigate = useNavigate();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleRegister = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError('');
     try {
-      const response = await axios.post('/api/auth/register', {
-        name,
-        email,
-        password,
-      });
-      localStorage.setItem('token', response.data.token);
+      const res = await axios.post('/api/auth/register', { name, email, password });
+      localStorage.setItem('token', res.data.token);
+      if (res.data.user?.id) localStorage.setItem('userId', res.data.user.id);
       navigate('/');
-      setSuccess('Registration successful! Please login.');
-    } catch (error) {
-      setError(error.response?.data?.message || 'Registration failed');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Registration failed.');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div style={{ padding: '2rem', maxWidth: '400px', margin: '0 auto' }}>
-      {success && (
-        <div style={{ background: '#d4edda', color: '#155724', padding: '1rem', borderRadius: '4px', marginBottom: '1rem' }}>
-          {success}
+    <div className="auth-page">
+      <div className="auth-card fade-up">
+        <div className="auth-logo">
+          <h1>🎓 Join CampusBid</h1>
+          <p>Campus-only auction marketplace. .edu email required.</p>
         </div>
-      )}
-      {error && (
-        <div style={{ background: '#f8d7da', color: '#721c24', padding: '1rem', borderRadius: '4px', marginBottom: '1rem' }}>
-          {error}
+
+        {error && <div className="alert alert-error">⚠️ {error}</div>}
+
+        <form onSubmit={handleRegister}>
+          <div className="form-group">
+            <label className="form-label">Full Name</label>
+            <input
+              id="reg-name"
+              className="form-input"
+              type="text"
+              placeholder="Your name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              autoComplete="name"
+            />
+          </div>
+          <div className="form-group">
+            <label className="form-label">College Email</label>
+            <input
+              id="reg-email"
+              className="form-input"
+              type="email"
+              placeholder="you@college.edu"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              autoComplete="email"
+            />
+            <div className="form-hint">Must be from your institution's allowed domain.</div>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Password</label>
+            <input
+              id="reg-password"
+              className="form-input"
+              type="password"
+              placeholder="Min 8 characters"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              minLength={6}
+              autoComplete="new-password"
+            />
+          </div>
+
+          <button id="reg-submit" type="submit" className="btn btn-primary btn-full btn-lg" disabled={loading}>
+            {loading ? 'Creating account…' : '→ Create Account'}
+          </button>
+        </form>
+
+        <div className="auth-divider">Trust & Safety</div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', fontSize: '0.75rem' }}>
+          {['🔒 Escrow Protection', '⚡ Anti-Snipe Bids', '🎓 .edu Verified', '📢 Match Alerts'].map((f) => (
+            <div key={f} style={{
+              padding: '0.5rem 0.75rem', borderRadius: 'var(--radius-sm)',
+              background: 'var(--bg-secondary)', border: '1px solid var(--border)',
+              color: 'var(--text-secondary)'
+            }}>
+              {f}
+            </div>
+          ))}
         </div>
-      )}
-      <h2>Register</h2>
-      <form onSubmit={handleRegister}>
-        <div style={{ marginBottom: '1rem' }}>
-          <label style={{ display: 'block', marginBottom: '0.5' }}>Name:</label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-            style={{ width: '100%', padding: '0.5rem', border: '1px solid #ddd', borderRadius: '4px' }}
-          />
+
+        <div className="auth-footer">
+          Already have an account? <Link to="/login">Sign in →</Link>
         </div>
-        <div style={{ marginBottom: '1rem' }}>
-          <label style={{ display: 'block', marginBottom: '0.5' }}>Email:</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            style={{ width: '100%', padding: '0.5rem', border: '1px solid #ddd', borderRadius: '4px' }}
-          />
-        </div>
-        <div style={{ marginBottom: '1rem' }}>
-          <label style={{ display: 'block', marginBottom: '0.5' }}>Password:</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            style={{ width: '100%', padding: '0.5rem', border: '1px solid #ddd', borderRadius: '4px' }}
-          />
-        </div>
-        <button type="submit" style={{ width: '100%', padding: '0.75rem', background: '#0066cc', color: 'white', border: 'none', borderRadius: '4px' }}>
-          Register
-        </button>
-        <p style={{ marginTop: '1rem', fontSize: '0.8rem', color: '#666' }}>
-          All fields required. Email must be from allowed college domain.
-        </p>
-      </form>
+      </div>
     </div>
   );
-};
-
-export default Register;
+}

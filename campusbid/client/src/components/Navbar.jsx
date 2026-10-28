@@ -1,215 +1,108 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 
-const Navbar = () => {
+const TICKER_ITEMS = [
+  { label: 'Anti-Snipe 30s Extension Active', dot: 'gold' },
+  { label: '4-Day Senior Departure Countdown', dot: '' },
+  { label: 'Escrow Verified by Student Senate', dot: 'red' },
+  { label: 'Live Auctions Running Now', dot: '' },
+];
+
+export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
   const [user, setUser] = useState(null);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    const name = localStorage.getItem('userName');
-    const userId = localStorage.getItem('userId');
     if (token) {
-      setUser({ name: name || 'Student', id: userId });
-    } else {
-      setUser(null);
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        setUser({ id: payload.userId, name: payload.name, email: payload.email });
+      } catch {
+        localStorage.removeItem('token');
+      }
     }
-  }, [location.pathname]);
+  }, [location]);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('userId');
-    localStorage.removeItem('userName');
     setUser(null);
     navigate('/login');
   };
 
   const isActive = (path) => location.pathname === path;
 
+  // Duplicate items for seamless loop
+  const tickerItems = [...TICKER_ITEMS, ...TICKER_ITEMS];
+
   return (
-    <nav style={{
-      background: '#0f1f38',
-      color: '#ffffff',
-      borderBottom: '1px solid rgba(255,255,255,0.1)',
-      position: 'sticky',
-      top: 0,
-      zIndex: 100,
-      fontFamily: 'Inter, sans-serif'
-    }}>
-      {/* Top Banner */}
-      <div style={{
-        background: '#081224',
-        padding: '0.35rem 1.5rem',
-        fontSize: '0.75rem',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        color: '#94a3b8'
-      }}>
-        <div>🎓 <strong>CampusBid</strong> • Senior Departure Auctions • Anti-Snipe 30s Extension Active</div>
-        <div style={{ color: '#f59e0b', fontWeight: 600 }}>CAMPUS VERIFIED • HANDOVER AT DORM</div>
+    <>
+      {/* Announcement bar */}
+      <div className="announcement-bar">
+        ⚡ CAMPUS AUCTION PLATFORM · Senate-Verified Escrow · Anti-Snipe Protection Active
       </div>
 
-      {/* Main Navbar */}
-      <div style={{
-        maxWidth: 1200,
-        margin: '0 auto',
-        padding: '0.75rem 1.5rem',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        flexWrap: 'wrap',
-        gap: '0.75rem'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-          <Link to="/" style={{ textDecoration: 'none', color: '#fff', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <span style={{ fontSize: '1.4rem' }}>🏛️</span>
-            <span style={{ fontSize: '1.25rem', fontWeight: 700, letterSpacing: '-0.02em', color: '#38bdf8' }}>CampusBid</span>
+      <nav className="navbar">
+        <div className="navbar-inner">
+          {/* Logo */}
+          <Link to="/" className="navbar-logo">
+            <div className="logo-icon">🎓</div>
+            Campus<span className="accent">Bid</span>
           </Link>
 
-          <div style={{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap' }}>
-            <Link to="/" style={{
-              padding: '0.4rem 0.75rem',
-              borderRadius: '6px',
-              textDecoration: 'none',
-              fontSize: '0.875rem',
-              fontWeight: 500,
-              background: isActive('/') ? '#1e293b' : 'transparent',
-              color: isActive('/') ? '#38bdf8' : '#cbd5e1'
-            }}>
-              Live Auctions
+          {/* Ticker */}
+          <div className="navbar-ticker">
+            <div className="navbar-ticker-inner">
+              {tickerItems.map((item, i) => (
+                <span key={i} className="ticker-item">
+                  <span className={`dot ${item.dot}`}></span>
+                  {item.label}
+                  &nbsp;•
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* Actions */}
+          <div className="navbar-actions">
+            <Link to="/" className={`nav-link ${isActive('/') ? 'active' : ''}`}>
+              🏠 Live
+            </Link>
+            <Link to="/wanted" className={`nav-link ${isActive('/wanted') ? 'active' : ''}`}>
+              🎯 Wanted
             </Link>
 
-            <Link to="/wanted" style={{
-              padding: '0.4rem 0.75rem',
-              borderRadius: '6px',
-              textDecoration: 'none',
-              fontSize: '0.875rem',
-              fontWeight: 500,
-              background: isActive('/wanted') ? '#1e293b' : 'transparent',
-              color: isActive('/wanted') ? '#38bdf8' : '#cbd5e1'
-            }}>
-              Wanted Alerts
-            </Link>
-
-            <Link to="/assistant" style={{
-              padding: '0.4rem 0.75rem',
-              borderRadius: '6px',
-              textDecoration: 'none',
-              fontSize: '0.875rem',
-              fontWeight: 500,
-              background: isActive('/assistant') ? '#1e293b' : 'transparent',
-              color: isActive('/assistant') ? '#38bdf8' : '#cbd5e1'
-            }}>
-              🤖 AI Assistant
-            </Link>
-
-            {user && (
+            {user ? (
               <>
-                <Link to="/my-listings" style={{
-                  padding: '0.4rem 0.75rem',
-                  borderRadius: '6px',
-                  textDecoration: 'none',
-                  fontSize: '0.875rem',
-                  fontWeight: 500,
-                  background: isActive('/my-listings') ? '#1e293b' : 'transparent',
-                  color: isActive('/my-listings') ? '#38bdf8' : '#cbd5e1'
-                }}>
+                <Link to="/create-listing" className="btn btn-gold btn-sm">
+                  + List Item
+                </Link>
+                <Link to="/my-listings" className={`nav-link ${isActive('/my-listings') ? 'active' : ''}`}>
                   My Listings
                 </Link>
-
-                <Link to="/my-bids" style={{
-                  padding: '0.4rem 0.75rem',
-                  borderRadius: '6px',
-                  textDecoration: 'none',
-                  fontSize: '0.875rem',
-                  fontWeight: 500,
-                  background: isActive('/my-bids') ? '#1e293b' : 'transparent',
-                  color: isActive('/my-bids') ? '#38bdf8' : '#cbd5e1'
-                }}>
-                  My Bids
+                <Link to="/notifications" className="nav-link">
+                  🔔
                 </Link>
-
-                <Link to="/notifications" style={{
-                  padding: '0.4rem 0.75rem',
-                  borderRadius: '6px',
-                  textDecoration: 'none',
-                  fontSize: '0.875rem',
-                  fontWeight: 500,
-                  background: isActive('/notifications') ? '#1e293b' : 'transparent',
-                  color: isActive('/notifications') ? '#38bdf8' : '#cbd5e1'
-                }}>
-                  🔔 Alerts
-                </Link>
+                <div className="navbar-user" onClick={handleLogout} title="Click to logout">
+                  <div className="user-avatar">
+                    {user.name?.[0]?.toUpperCase() || 'U'}
+                  </div>
+                  <span style={{ maxWidth: '100px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {user.name}
+                  </span>
+                </div>
+              </>
+            ) : (
+              <>
+                <Link to="/login" className="btn btn-ghost btn-sm">Login</Link>
+                <Link to="/register" className="btn btn-primary btn-sm">Register</Link>
               </>
             )}
           </div>
         </div>
-
-        {/* Action Buttons */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <Link to="/create-listing" style={{
-            padding: '0.45rem 0.9rem',
-            background: '#d97706',
-            color: '#ffffff',
-            borderRadius: '6px',
-            textDecoration: 'none',
-            fontSize: '0.85rem',
-            fontWeight: 600,
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.25rem'
-          }}>
-            + Post Item
-          </Link>
-
-          {user ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>
-                👤 {user.name}
-              </span>
-              <button onClick={handleLogout} style={{
-                padding: '0.35rem 0.7rem',
-                background: 'rgba(255,255,255,0.1)',
-                color: '#f8fafc',
-                borderRadius: '4px',
-                fontSize: '0.8rem',
-                border: '1px solid rgba(255,255,255,0.2)'
-              }}>
-                Logout
-              </button>
-            </div>
-          ) : (
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <Link to="/login" style={{
-                padding: '0.4rem 0.8rem',
-                background: 'transparent',
-                color: '#f8fafc',
-                borderRadius: '4px',
-                border: '1px solid rgba(255,255,255,0.2)',
-                textDecoration: 'none',
-                fontSize: '0.85rem'
-              }}>
-                Login
-              </Link>
-              <Link to="/register" style={{
-                padding: '0.4rem 0.8rem',
-                background: '#2563eb',
-                color: '#fff',
-                borderRadius: '4px',
-                textDecoration: 'none',
-                fontSize: '0.85rem',
-                fontWeight: 600
-              }}>
-                Sign Up
-              </Link>
-            </div>
-          )}
-        </div>
-      </div>
-    </nav>
+      </nav>
+    </>
   );
-};
-
-export default Navbar;
+}

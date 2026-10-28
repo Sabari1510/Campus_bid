@@ -1,123 +1,112 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 
-const AuctionDetail = () => {
+function formatCountdown(ms) {
+  if (ms <= 0) return 'CLOSED';
+  const h = Math.floor(ms / 3600000);
+  const m = Math.floor((ms % 3600000) / 60000);
+  const s = Math.floor((ms % 60000) / 1000);
+  if (h > 0) return `${h}h ${m}m ${s}s`;
+  return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+
+export default function AuctionDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
 
   const [auction, setAuction] = useState(null);
   const [bids, setBids] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  // Forms
   const [bidAmount, setBidAmount] = useState('');
   const [autoBidMax, setAutoBidMax] = useState('');
   const [questionText, setQuestionText] = useState('');
-  const [sellerAnswer, setSellerAnswer] = useState({});
   const [submittingBid, setSubmittingBid] = useState(false);
   const [submittingAuto, setSubmittingAuto] = useState(false);
   const [submittingQ, setSubmittingQ] = useState(false);
+  const [bidMsg, setBidMsg] = useState({ type: '', text: '' });
+  const [msLeft, setMsLeft] = useState(0);
 
   const token = localStorage.getItem('token');
   const userId = localStorage.getItem('userId');
 
-  const fetchDetails = async () => {
+  const fetchDetails = useCallback(async () => {
     try {
       const [aucRes, bidsRes] = await Promise.all([
         axios.get(`/api/auctions/${id}`),
-        axios.get(`/api/auctions/${id}/bids`)
+        axios.get(`/api/auctions/${id}/bids`),
       ]);
       setAuction(aucRes.data);
       setBids(Array.isArray(bidsRes.data) ? bidsRes.data : []);
-    } catch (err) {
-      console.error(err);
+    } catch (e) {
+      console.error(e);
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
 
   useEffect(() => {
     fetchDetails();
-    const interval = setInterval(fetchDetails, 4000); // 4s fallback polling
-    return () => clearInterval(interval);
-  }, [id]);
+    const pollIv = setInterval(fetchDetails, 4000);
+    return () => clearInterval(pollIv);
+  }, [fetchDetails]);
 
-  if (loading) return <div className="container" style={{ padding: '3rem', textAlign: 'center' }}>Loading auction lot #{id}...</div>;
-  if (!auction) return <div className="container" style={{ padding: '3rem', textAlign: 'center' }}>Auction lot not found. <Link to="/">Return home</Link></div>;
+  // Live countdown
+  useEffect(() => {
+    if (!auction) return;
+    const tick = () => setMsLeft(new Date(auction.closesAt) - Date.now());
+    tick();
+    const iv = setInterval(tick, 500);
+    return () => clearInterval(iv);
+  }, [auction]);
 
-  const currentPrice = Number(auction.currentPrice || auction.startPrice || 0);
-  const minIncrement = Number(auction.minIncrement || 10);
+  const isClosed = msLeft <= 0;
+  const isClosingSoon = msLeft > 0 && msLeft < 120000; // 2 min
+  const sellerId = auction ? (typeof auction.sellerId === 'object' ? auction.sellerId?._id : auction.sellerId) : null;
+  const isSeller = userId && sellerId && sellerId.toString() === userId.toString();
+  const currentPrice = Number(auction?.currentPrice || auction?.startPrice || 0);
+  const minIncrement = Number(auction?.minIncrement || 10);
   const nextMinBid = currentPrice + minIncrement;
 
-  // Seller check
-  const sellerId = typeof auction.sellerId === 'object' ? auction.sellerId?._id : auction.sellerId;
-  const isSeller = userId && sellerId && sellerId.toString() === userId.toString();
-
-  // Time remaining
-  const now = new Date();
-  const closesAt = new Date(auction.closesAt);
-  const diffMs = closesAt - now;
-  const isClosingSoon = diffMs > 0 && diffMs <= 30000; // <= 30 seconds
-  const isClosed = diffMs <= 0 || auction.status !== 'ACTIVE';
-
-  const formatCountdown = () => {
-    if (isClosed) return 'AUCTION CLOSED';
-    const mins = Math.floor(diffMs / 60000);
-    const secs = Math.floor((diffMs % 60000) / 1000);
-    return `${mins}m ${secs}s`;
+  const showBidMsg = (type, text) => {
+    setBidMsg({ type, text });
+    setTimeout(() => setBidMsg({ type: '', text: '' }), 3000);
   };
 
-  // Bid handlers
-  const handlePlaceBid = async (amountToBid) => {
-    const val = Number(amountToBid || bidAmount);
-    if (!val || val < nextMinBid) {
-      alert(`Minimum allowed bid is ₹${nextMinBid}`);
+  const handlePlaceBid = async (amount) => {
+    const finalAmount = amount || Number(bidAmount);
+    if (!token) { navigate('/login'); return; }
+    if (!finalAmount || finalAmount < nextMinBid) {
+      showBidMsg('error', `Minimum bid is ₹${nextMinBid}`);
       return;
     }
-    if (!token) {
-      alert('Please log in to place bids');
-      navigate('/login');
-      return;
-    }
-
     setSubmittingBid(true);
     try {
-      await axios.post(`/api/auctions/${id}/bids`, { amount: val }, {
+      await axios.post(`/api/auctions/${id}/bids`, { amount: finalAmount }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setBidAmount('');
-      await fetchDetails();
-      alert('Bid accepted!');
+      showBidMsg('success', `Bid of ₹${finalAmount} placed!`);
+      fetchDetails();
     } catch (err) {
-      alert(err.response?.data?.message || 'Bid failed');
+      showBidMsg('error', err.response?.data?.message || 'Bid failed');
     } finally {
       setSubmittingBid(false);
     }
   };
 
   const handleSetAutoBid = async () => {
-    const maxVal = Number(autoBidMax);
-    if (!maxVal || maxVal <= currentPrice) {
-      alert(`Proxy max must be higher than current price ₹${currentPrice}`);
-      return;
-    }
-    if (!token) {
-      alert('Please log in to set auto-bid');
-      navigate('/login');
-      return;
-    }
-
+    if (!token) { navigate('/login'); return; }
+    if (!autoBidMax) return;
     setSubmittingAuto(true);
     try {
-      await axios.put(`/api/auctions/${id}/autobid`, { maxAmount: maxVal }, {
+      await axios.post(`/api/auctions/${id}/autobid`, { maxAmount: Number(autoBidMax) }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setAutoBidMax('');
-      alert(`Auto-bid proxy set to ₹${maxVal}! System will automatically outbid competitors up to this maximum.`);
-      await fetchDetails();
+      showBidMsg('success', `Auto-bid max set to ₹${autoBidMax}`);
     } catch (err) {
-      alert(err.response?.data?.message || 'Auto-bid failed');
+      showBidMsg('error', err.response?.data?.message || 'Auto-bid failed');
     } finally {
       setSubmittingAuto(false);
     }
@@ -126,335 +115,297 @@ const AuctionDetail = () => {
   const handleAskQuestion = async (e) => {
     e.preventDefault();
     if (!questionText.trim()) return;
-    if (!token) {
-      alert('Please log in to ask questions');
-      navigate('/login');
-      return;
-    }
-
+    if (!token) { navigate('/login'); return; }
     setSubmittingQ(true);
     try {
       await axios.post(`/api/auctions/${id}/questions`, { text: questionText }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setQuestionText('');
-      alert('Question posted for seller!');
+      showBidMsg('success', 'Question sent to seller!');
       fetchDetails();
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to submit question');
+      showBidMsg('error', err.response?.data?.message || 'Failed to submit question');
     } finally {
       setSubmittingQ(false);
     }
   };
 
+  if (loading) return (
+    <div className="page-loader">
+      <div className="spinner" />
+      <span>Loading auction lot…</span>
+    </div>
+  );
+
+  if (!auction) return (
+    <div className="page-main">
+      <div className="empty-state">
+        <div className="icon">🔍</div>
+        <h3>Auction not found</h3>
+        <p>This lot may have been removed.</p>
+        <Link to="/" className="btn btn-primary" style={{ marginTop: '1rem' }}>← Back to Live Auctions</Link>
+      </div>
+    </div>
+  );
+
+  const questions = auction.questions || [];
+  const photos = auction.photos || [];
+
   return (
-    <div className="container" style={{ maxWidth: 950, padding: '2rem 1.5rem' }}>
-      <button onClick={() => navigate('/')} style={{ marginBottom: '1rem', background: 'transparent', color: '#38bdf8' }}>
-        &larr; Back to Live Auctions
+    <div className="page-main fade-up">
+      {/* Back */}
+      <button className="btn btn-ghost btn-sm" onClick={() => navigate('/')} style={{ marginBottom: '1rem' }}>
+        ← Back to Live Auctions
       </button>
 
-      {/* Anti-snipe Banner */}
+      {/* Anti-snipe banner */}
       {isClosingSoon && (
-        <div style={{
-          background: 'rgba(217, 119, 6, 0.2)',
-          border: '2px solid #d97706',
-          borderRadius: '8px',
-          padding: '0.75rem 1rem',
-          color: '#fbbf24',
-          fontWeight: 700,
-          marginBottom: '1.5rem',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.5rem',
-          animation: 'pulse 1.5s infinite'
-        }}>
-          ⚡ ANTI-SNIPE ACTIVE: Bids placed under 30s remaining automatically extend closing time by +60 seconds!
+        <div className="snipe-banner">
+          ⚡ ANTI-SNIPE ACTIVE — bids placed in last 30s extend closing time by +60s automatically!
+        </div>
+      )}
+
+      {/* Bid status message */}
+      {bidMsg.text && (
+        <div className={`alert alert-${bidMsg.type === 'success' ? 'success' : 'error'}`} style={{ marginBottom: '1rem' }}>
+          {bidMsg.type === 'success' ? '✅' : '⚠️'} {bidMsg.text}
         </div>
       )}
 
       {/* Main Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: '1.5rem', alignItems: 'start' }}>
-        {/* Left Column: Details & Q&A */}
-        <div>
-          <div style={{
-            background: 'var(--bg-secondary)',
-            borderRadius: '10px',
-            border: '1px solid var(--border-color)',
-            padding: '1.5rem',
-            marginBottom: '1.5rem'
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: '0.8rem', color: '#38bdf8', textTransform: 'uppercase', fontWeight: 600 }}>
-                {auction.category || 'General'} • Lot #{auction._id.slice(-6)}
-              </span>
-              <span style={{
-                padding: '0.2rem 0.6rem',
-                borderRadius: '999px',
-                fontSize: '0.75rem',
-                fontWeight: 700,
-                background: auction.status === 'ACTIVE' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)',
-                color: auction.status === 'ACTIVE' ? '#10b981' : '#ef4444'
-              }}>
-                {auction.status}
-              </span>
+      <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '1.5rem', alignItems: 'start' }}>
+
+        {/* ── LEFT: Details & Q&A ── */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+
+          {/* Item Card */}
+          <div className="card">
+            <div className="card-body">
+              {/* Header row */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                <span style={{ fontSize: '0.8rem', color: 'var(--accent-blue)', textTransform: 'uppercase', fontWeight: 700 }}>
+                  {auction.category || 'General'} · Lot #{auction._id.slice(-6).toUpperCase()}
+                </span>
+                <span className={`badge badge-${auction.status === 'ACTIVE' ? 'active' : 'closed'}`}>
+                  {auction.status}
+                </span>
+              </div>
+
+              {/* Photos */}
+              {photos.length > 0 && (
+                <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem', overflowX: 'auto' }}>
+                  {photos.map((p, i) => (
+                    <img
+                      key={i}
+                      src={p.url || p}
+                      alt={`Photo ${i + 1}`}
+                      style={{ height: 160, width: 220, objectFit: 'cover', borderRadius: 'var(--radius-sm)', flexShrink: 0 }}
+                      onError={(e) => { e.target.style.display = 'none'; }}
+                    />
+                  ))}
+                </div>
+              )}
+
+              <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '1.75rem', color: 'var(--text-primary)', marginBottom: '0.5rem' }}>
+                {auction.title}
+              </h1>
+
+              <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>
+                Listed by <strong style={{ color: 'var(--text-primary)' }}>{auction.sellerId?.name || 'Graduating Senior'}</strong>
+                &nbsp;·&nbsp;Condition: <strong style={{ color: 'var(--text-primary)' }}>{auction.condition || 'Used'}</strong>
+              </div>
+
+              <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7 }}>
+                {auction.description || 'No description provided.'}
+              </p>
             </div>
-
-            <h1 style={{ fontSize: '1.8rem', color: '#f8fafc', margin: '0.5rem 0' }}>
-              {auction.title}
-            </h1>
-
-            <div style={{ fontSize: '0.85rem', color: '#94a3b8', marginBottom: '1.25rem' }}>
-              Listed by <strong>{auction.sellerId?.name || 'Graduating Senior'}</strong> • Condition: <strong>{auction.condition || 'Used'}</strong>
-            </div>
-
-            <p style={{ color: '#cbd5e1', lineHeight: 1.6, fontSize: '0.95rem' }}>
-              {auction.description || 'No description provided.'}
-            </p>
           </div>
 
-          {/* Q&A Section */}
-          <div style={{
-            background: 'var(--bg-secondary)',
-            borderRadius: '10px',
-            border: '1px solid var(--border-color)',
-            padding: '1.5rem'
-          }}>
-            <h2 style={{ fontSize: '1.25rem', color: '#f8fafc', marginBottom: '0.5rem' }}>
-              💬 Pre-Bid Questions & Answers
-            </h2>
-            <p style={{ color: '#94a3b8', fontSize: '0.85rem', marginBottom: '1.25rem' }}>
-              Public clarifications visible to all bidders to guarantee fair competition.
-            </p>
+          {/* Q&A */}
+          <div className="card">
+            <div className="card-body">
+              <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '1.1rem', marginBottom: '0.4rem' }}>
+                💬 Pre-Bid Q&A
+              </h2>
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '1.25rem' }}>
+                Public clarifications visible to all bidders.
+              </p>
 
-            {/* Ask form */}
-            {!isSeller && (
-              <form onSubmit={handleAskQuestion} style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>
-                <input
-                  type="text"
-                  placeholder="Ask seller about working condition, accessories, hostel pickup..."
-                  value={questionText}
-                  onChange={(e) => setQuestionText(e.target.value)}
-                  style={{ flex: 1 }}
-                />
-                <button
-                  type="submit"
-                  disabled={submittingQ}
-                  style={{ padding: '0.5rem 1rem', background: '#2563eb', color: '#fff', fontWeight: 600 }}
-                >
-                  {submittingQ ? 'Posting...' : 'Ask'}
-                </button>
-              </form>
-            )}
+              {!isSeller && !isClosed && (
+                <form onSubmit={handleAskQuestion} style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>
+                  <input
+                    className="form-input"
+                    placeholder="Ask about condition, accessories, hostel pickup…"
+                    value={questionText}
+                    onChange={(e) => setQuestionText(e.target.value)}
+                    style={{ flex: 1 }}
+                  />
+                  <button type="submit" className="btn btn-primary btn-sm" disabled={submittingQ}>
+                    {submittingQ ? '…' : 'Ask'}
+                  </button>
+                </form>
+              )}
 
-            {/* List questions */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              <div style={{ padding: '0.75rem', background: 'var(--bg-primary)', borderRadius: '6px', border: '1px solid var(--border-color)' }}>
-                <div style={{ fontSize: '0.85rem', color: '#f8fafc', fontWeight: 600 }}>
-                  Q: Does this come with original charger/cables?
-                </div>
-                <div style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '0.2rem' }}>
-                  A: Yes, original box and charger included. Pickup at Hostel 14.
-                </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                {questions.length === 0 ? (
+                  <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>No questions yet. Be the first to ask!</div>
+                ) : (
+                  questions.map((q, i) => (
+                    <div key={i} style={{ padding: '0.75rem 1rem', background: 'var(--bg-primary)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)' }}>
+                      <div style={{ fontSize: '0.85rem', color: 'var(--text-primary)', fontWeight: 600, marginBottom: '0.25rem' }}>
+                        Q: {q.text}
+                      </div>
+                      {q.answer && (
+                        <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                          A: {q.answer}
+                        </div>
+                      )}
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           </div>
         </div>
 
-        {/* Right Column: Bidding Card & History */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          {/* Main Bidding Card */}
-          <div style={{
-            background: 'var(--bg-secondary)',
-            borderRadius: '10px',
-            border: '1px solid var(--border-color)',
-            padding: '1.5rem'
-          }}>
-            <div style={{
-              background: '#081224',
-              borderRadius: '8px',
-              padding: '1rem',
-              textAlign: 'center',
-              marginBottom: '1.25rem',
-              border: isClosingSoon ? '1px solid #d97706' : '1px solid var(--border-color)'
-            }}>
-              <div style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase' }}>Time Remaining</div>
-              <div style={{
-                fontSize: '1.75rem',
-                fontWeight: 700,
-                color: isClosed ? '#ef4444' : isClosingSoon ? '#f59e0b' : '#38bdf8',
-                fontFamily: 'Space Grotesk, monospace'
-              }}>
-                {formatCountdown()}
-              </div>
-              <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.2rem' }}>
-                Closes: {closesAt.toLocaleTimeString()}
-              </div>
-            </div>
+        {/* ── RIGHT: Bidding ── */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', position: 'sticky', top: '80px' }}>
 
-            {/* Current Price */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-              <div>
-                <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Current High Bid</span>
-                <div style={{ fontSize: '1.8rem', fontWeight: 700, color: '#10b981' }}>
-                  ₹{currentPrice}
+          {/* Countdown + Price */}
+          <div className="card">
+            <div className="card-body">
+              {/* Countdown */}
+              <div className="countdown-display">
+                <div className="countdown-label">Time Remaining</div>
+                <div className={`countdown-value ${isClosed ? 'closed' : isClosingSoon ? 'urgent' : 'live'}`}>
+                  {formatCountdown(msLeft)}
+                </div>
+                <div className="countdown-closes">
+                  Closes: {new Date(auction.closesAt).toLocaleString()}
                 </div>
               </div>
-              <div style={{ textAlign: 'right' }}>
-                <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Next Min Allowed</span>
-                <div style={{ fontSize: '1.1rem', fontWeight: 600, color: '#cbd5e1' }}>
-                  ₹{nextMinBid}
-                </div>
-              </div>
-            </div>
 
-            {/* Bidding Controls */}
-            {!isClosed && !isSeller && (
-              <>
-                {/* Quick Bid Triggers */}
-                <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
-                  {[10, 50, 100].map(inc => (
-                    <button
-                      key={inc}
-                      onClick={() => handlePlaceBid(currentPrice + inc)}
-                      style={{
-                        flex: 1,
-                        padding: '0.45rem',
-                        background: 'rgba(56, 189, 248, 0.1)',
-                        color: '#38bdf8',
-                        border: '1px solid rgba(56, 189, 248, 0.3)',
-                        borderRadius: '4px',
-                        fontWeight: 600,
-                        fontSize: '0.85rem'
-                      }}
-                    >
-                      +₹{inc}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Custom Bid */}
-                <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem' }}>
-                  <input
-                    type="number"
-                    min={nextMinBid}
-                    placeholder={`Min: ₹${nextMinBid}`}
-                    value={bidAmount}
-                    onChange={(e) => setBidAmount(e.target.value)}
-                    style={{ flex: 1 }}
-                  />
-                  <button
-                    onClick={() => handlePlaceBid()}
-                    disabled={submittingBid}
-                    style={{
-                      padding: '0.6rem 1.2rem',
-                      background: '#d97706',
-                      color: '#ffffff',
-                      fontWeight: 700,
-                      borderRadius: '6px'
-                    }}
-                  >
-                    {submittingBid ? 'Bidding...' : 'Place Bid'}
-                  </button>
-                </div>
-
-                {/* Proxy Auto-Bid */}
-                <div style={{
-                  padding: '1rem',
-                  background: 'var(--bg-primary)',
-                  borderRadius: '8px',
-                  border: '1px solid var(--border-color)'
-                }}>
-                  <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#f8fafc', marginBottom: '0.25rem' }}>
-                    🤖 Set Proxy Auto-Bid Max
+              {/* Price row */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '1.25rem' }}>
+                <div>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '0.2rem' }}>Current High Bid</div>
+                  <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '2rem', fontWeight: 700, color: 'var(--accent-green)' }}>
+                    ₹{currentPrice}
                   </div>
-                  <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginBottom: '0.75rem' }}>
-                    Our system will automatically outbid competitors by ₹{minIncrement} up to your cap.
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: '0.2rem' }}>Min Next Bid</div>
+                  <div style={{ fontWeight: 700, color: 'var(--text-secondary)', fontSize: '1.1rem' }}>₹{nextMinBid}</div>
+                </div>
+              </div>
+
+              {/* Bidding Controls */}
+              {!isClosed && !isSeller && (
+                <>
+                  {/* Quick bid */}
+                  <div className="quick-bid-row">
+                    {[minIncrement, minIncrement * 5, minIncrement * 10].map((inc) => (
+                      <button
+                        key={inc}
+                        className="quick-bid-btn"
+                        onClick={() => handlePlaceBid(currentPrice + inc)}
+                        disabled={submittingBid}
+                      >
+                        +₹{inc}
+                      </button>
+                    ))}
                   </div>
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+
+                  {/* Custom bid */}
+                  <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem' }}>
                     <input
+                      className="form-input"
                       type="number"
-                      placeholder="e.g. 1800"
-                      value={autoBidMax}
-                      onChange={(e) => setAutoBidMax(e.target.value)}
+                      min={nextMinBid}
+                      placeholder={`Min: ₹${nextMinBid}`}
+                      value={bidAmount}
+                      onChange={(e) => setBidAmount(e.target.value)}
                       style={{ flex: 1 }}
                     />
                     <button
-                      onClick={handleSetAutoBid}
-                      disabled={submittingAuto}
-                      style={{
-                        padding: '0.5rem 1rem',
-                        background: '#2563eb',
-                        color: '#fff',
-                        fontWeight: 600,
-                        fontSize: '0.85rem'
-                      }}
+                      className="btn btn-gold"
+                      onClick={() => handlePlaceBid()}
+                      disabled={submittingBid}
                     >
-                      Set Max
+                      {submittingBid ? '…' : 'Place Bid'}
                     </button>
                   </div>
-                </div>
-              </>
-            )}
 
-            {isSeller && (
-              <div style={{
-                padding: '0.75rem',
-                background: 'rgba(217, 119, 6, 0.1)',
-                border: '1px solid #d97706',
-                borderRadius: '6px',
-                color: '#fbbf24',
-                fontSize: '0.85rem'
-              }}>
-                ℹ️ You are the seller of this item. Manage approvals in your{' '}
-                <Link to="/my-listings" style={{ color: '#38bdf8', textDecoration: 'underline' }}>Seller Dashboard</Link>.
-              </div>
-            )}
+                  {/* Auto-bid */}
+                  <div style={{ padding: '1rem', background: 'var(--bg-primary)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)' }}>
+                    <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.3rem' }}>
+                      🤖 Proxy Auto-Bid
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.75rem' }}>
+                      We auto-outbid rivals by ₹{minIncrement} up to your ceiling.
+                    </div>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <input
+                        className="form-input"
+                        type="number"
+                        placeholder={`e.g. ₹${currentPrice + minIncrement * 10}`}
+                        value={autoBidMax}
+                        onChange={(e) => setAutoBidMax(e.target.value)}
+                        style={{ flex: 1 }}
+                      />
+                      <button className="btn btn-primary btn-sm" onClick={handleSetAutoBid} disabled={submittingAuto}>
+                        {submittingAuto ? '…' : 'Set Max'}
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {isClosed && (
+                <div className="alert alert-error" style={{ textAlign: 'center' }}>
+                  🔒 This auction has closed.
+                </div>
+              )}
+
+              {isSeller && (
+                <div className="alert alert-warning">
+                  ℹ️ You are the seller.{' '}
+                  <Link to="/my-listings" style={{ color: 'var(--accent-blue)', fontWeight: 600 }}>Manage in Seller Dashboard →</Link>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Bid History */}
-          <div style={{
-            background: 'var(--bg-secondary)',
-            borderRadius: '10px',
-            border: '1px solid var(--border-color)',
-            padding: '1.25rem'
-          }}>
-            <h3 style={{ fontSize: '1rem', color: '#f8fafc', marginBottom: '0.75rem' }}>
-              📊 Public Bid History ({bids.length})
-            </h3>
-            {bids.length === 0 ? (
-              <p style={{ color: '#94a3b8', fontSize: '0.85rem' }}>No bids yet. Opening bid starts at ₹{auction.startPrice}!</p>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '250px', overflowY: 'auto' }}>
-                {bids.map((b, i) => (
-                  <div
-                    key={b._id || i}
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      padding: '0.45rem 0.6rem',
-                      background: i === 0 ? 'rgba(16, 185, 129, 0.15)' : 'var(--bg-primary)',
-                      border: i === 0 ? '1px solid #10b981' : '1px solid var(--border-color)',
-                      borderRadius: '4px',
-                      fontSize: '0.85rem'
-                    }}
-                  >
-                    <div>
-                      <strong style={{ color: '#f8fafc' }}>
-                        {b.bidderId?.name || 'Student Bidder'}
-                      </strong>
-                      {b.isAuto && <span style={{ fontSize: '0.7rem', color: '#38bdf8', marginLeft: '0.3rem' }}>(auto)</span>}
+          <div className="card">
+            <div className="card-body" style={{ padding: '1.25rem' }}>
+              <h3 style={{ fontSize: '0.95rem', marginBottom: '0.85rem', color: 'var(--text-primary)' }}>
+                📊 Bid History <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>({bids.length})</span>
+              </h3>
+              {bids.length === 0 ? (
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+                  No bids yet. Opening: ₹{auction.startPrice}
+                </p>
+              ) : (
+                <div style={{ maxHeight: 260, overflowY: 'auto' }}>
+                  {bids.map((b, i) => (
+                    <div key={b._id || i} className={`bid-row ${i === 0 ? 'top' : ''}`}>
+                      <div>
+                        <strong style={{ color: 'var(--text-primary)', fontSize: '0.85rem' }}>
+                          {i === 0 ? '🥇 ' : ''}{b.bidderId?.name || 'Student'}
+                        </strong>
+                        {b.isAuto && <span style={{ fontSize: '0.68rem', color: 'var(--accent-blue)', marginLeft: 4 }}>(auto)</span>}
+                      </div>
+                      <span className="bid-row-amount">₹{b.amount}</span>
                     </div>
-                    <span style={{ fontWeight: 700, color: '#10b981' }}>₹{b.amount}</span>
-                  </div>
-                ))}
-              </div>
-            )}
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
     </div>
   );
-};
-
-export default AuctionDetail;
+}

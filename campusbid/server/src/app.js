@@ -19,6 +19,7 @@ app.use((req, res, next) => {
 app.use(helmet());
 app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 100 }));
 app.use(cookieParser());
+app.use('/uploads', express.static('uploads'));
 
 import authRoutes from './routes/auth.routes.js';
 import auctionRoutes from './routes/auction.routes.js';
@@ -44,6 +45,14 @@ app.use('/api/ai', aiRoutes);
 // Catch-all 404
 app.use((req, res) => {
   res.status(404).json({ message: 'Not found' });
+});
+
+// Error handler (returns JSON for multer/body-parser errors)
+app.use((err, req, res, next) => {
+  if (err.code === 'LIMIT_FILE_SIZE') {
+    return res.status(400).json({ message: 'Photo too large (max 5MB)' });
+  }
+  res.status(err.status || 500).json({ message: err.message || 'Server error' });
 });
 
 export default app;

@@ -1,11 +1,11 @@
+import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import dotenv from 'dotenv';
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __dirname  = path.dirname(__filename);
+// Always load .env from server/ regardless of the CWD where node is invoked
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
-
 
 import connectDB from '../config/db.js';
 import { validateEnv } from '../config/env.js';

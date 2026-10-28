@@ -2,126 +2,76 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 
-const Notifications = () => {
-  const [notifications, setNotifications] = useState([]);
+export default function Notifications() {
+  const [notifs, setNotifs] = useState([]);
   const [loading, setLoading] = useState(true);
   const token = localStorage.getItem('token');
 
-  const fetchNotifs = async () => {
-    if (!token) {
-      setLoading(false);
-      return;
-    }
-    try {
-      const res = await axios.get('/api/notifications', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setNotifications(Array.isArray(res.data) ? res.data : []);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchNotifs();
+    if (!token) { setLoading(false); return; }
+    axios.get('/api/notifications', { headers: { Authorization: `Bearer ${token}` } })
+      .then(res => setNotifs(Array.isArray(res.data) ? res.data : []))
+      .catch(console.error)
+      .finally(() => setLoading(false));
   }, []);
 
-  const markAllRead = async () => {
+  const markRead = async (id) => {
     try {
-      await axios.post('/api/notifications/read', {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      fetchNotifs();
-    } catch (err) {
-      console.error(err);
-    }
+      await axios.patch(`/api/notifications/${id}/read`, {}, { headers: { Authorization: `Bearer ${token}` } });
+      setNotifs(n => n.map(x => x._id === id ? { ...x, read: true } : x));
+    } catch { /* ignore */ }
   };
 
-  if (!token) {
-    return (
-      <div className="container" style={{ textAlign: 'center', padding: '3rem' }}>
-        <h2>Notifications & Alerts</h2>
-        <p style={{ color: '#94a3b8', margin: '1rem 0' }}>Please log in to see your alerts and bidding updates.</p>
-        <Link to="/login" style={{ padding: '0.5rem 1rem', background: '#2563eb', color: '#fff', borderRadius: '4px', textDecoration: 'none' }}>
-          Login
-        </Link>
+  if (!token) return (
+    <div className="page-main">
+      <div className="empty-state">
+        <div className="icon">🔐</div>
+        <h3>Log in to see notifications</h3>
+        <Link to="/login" className="btn btn-primary" style={{ marginTop: '1rem' }}>Sign In</Link>
       </div>
-    );
-  }
+    </div>
+  );
+
+  if (loading) return <div className="page-loader"><div className="spinner" /><span>Loading notifications…</span></div>;
 
   return (
-    <div className="container" style={{ maxWidth: 850, padding: '2rem 1.5rem' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+    <div className="page-main fade-up" style={{ maxWidth: 700 }}>
+      <div className="section-header">
         <div>
-          <h1 style={{ fontSize: '1.75rem', color: '#f8fafc', margin: 0 }}>
-            🔔 Live Alerts & Notifications
-          </h1>
-          <p style={{ color: '#94a3b8', fontSize: '0.9rem', marginTop: '0.25rem' }}>
-            Outbid events, anti-snipe countdown extensions, and Wanted matches.
-          </p>
+          <h1 className="section-title">🔔 Notifications</h1>
+          <p className="section-sub">{notifs.filter(n => !n.read).length} unread</p>
         </div>
-        {notifications.length > 0 && (
-          <button
-            onClick={markAllRead}
-            style={{
-              padding: '0.4rem 0.8rem',
-              background: 'transparent',
-              color: '#38bdf8',
-              border: '1px solid #38bdf8',
-              borderRadius: '4px',
-              fontSize: '0.85rem'
-            }}
-          >
-            Mark All Read
-          </button>
-        )}
       </div>
 
-      {loading ? (
-        <p style={{ color: '#94a3b8' }}>Loading alerts...</p>
-      ) : notifications.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '3rem', background: 'var(--bg-secondary)', borderRadius: '8px' }}>
-          <p style={{ color: '#94a3b8' }}>All caught up! No unread notifications.</p>
+      {notifs.length === 0 ? (
+        <div className="empty-state">
+          <div className="icon">🔕</div>
+          <h3>No notifications yet</h3>
+          <p>Set wanted alerts and bid on auctions to start receiving updates.</p>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-          {notifications.map((notif) => (
+          {notifs.map((n) => (
             <div
-              key={notif._id}
+              key={n._id}
+              className="card"
               style={{
-                background: notif.read ? 'rgba(30, 41, 59, 0.4)' : 'var(--bg-secondary)',
-                border: notif.read ? '1px solid var(--border-color)' : '1px solid rgba(56, 189, 248, 0.4)',
-                borderRadius: '8px',
-                padding: '1rem 1.25rem',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center'
+                borderColor: n.read ? 'var(--border)' : 'rgba(56,189,248,0.35)',
+                background: n.read ? '' : 'rgba(56,189,248,0.04)',
               }}
             >
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <span style={{ fontSize: '1.1rem' }}>
-                    {notif.type === 'OUTBID' ? '⚠️' : notif.type === 'EXTENSION' ? '⏱️' : notif.type === 'WANTED_MATCH' ? '🎯' : '📢'}
-                  </span>
-                  <strong style={{ color: '#f8fafc', fontSize: '0.95rem' }}>
-                    {notif.type || 'Notice'}
-                  </strong>
-                  {!notif.read && (
-                    <span style={{ padding: '0.1rem 0.4rem', borderRadius: '999px', fontSize: '0.65rem', background: '#38bdf8', color: '#0f172a', fontWeight: 700 }}>
-                      NEW
-                    </span>
-                  )}
+              <div className="card-body" style={{ padding: '1rem 1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem' }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: n.read ? 400 : 700, color: 'var(--text-primary)', marginBottom: '0.25rem' }}>
+                    {n.message || n.text || 'Notification'}
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                    {n.createdAt ? new Date(n.createdAt).toLocaleString() : ''}
+                  </div>
                 </div>
-                <p style={{ margin: '0.35rem 0', color: '#cbd5e1', fontSize: '0.875rem' }}>
-                  {typeof notif.payload === 'string' 
-                    ? notif.payload 
-                    : notif.payload?.message || JSON.stringify(notif.payload || {})}
-                </p>
-                <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
-                  {new Date(notif.createdAt || Date.now()).toLocaleTimeString()}
-                </span>
+                {!n.read && (
+                  <button className="btn btn-ghost btn-sm" onClick={() => markRead(n._id)}>Mark read</button>
+                )}
               </div>
             </div>
           ))}
@@ -129,6 +79,4 @@ const Notifications = () => {
       )}
     </div>
   );
-};
-
-export default Notifications;
+}

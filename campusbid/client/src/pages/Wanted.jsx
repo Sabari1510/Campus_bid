@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
-const Wanted = () => {
+const CATEGORIES = ['All', 'Electronics', 'Cycles', 'Books', 'Dorm', 'Sports', 'Clothing', 'Other'];
+
+export default function Wanted() {
   const navigate = useNavigate();
   const [alerts, setAlerts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -10,210 +12,174 @@ const Wanted = () => {
   const [category, setCategory] = useState('All');
   const [maxPrice, setMaxPrice] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [message, setMessage] = useState('');
-
+  const [message, setMessage] = useState({ type: '', text: '' });
   const token = localStorage.getItem('token');
 
   const fetchAlerts = async () => {
-    if (!token) {
-      setLoading(false);
-      return;
-    }
+    if (!token) { setLoading(false); return; }
     try {
-      const res = await axios.get('/api/wanted', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await axios.get('/api/wanted', { headers: { Authorization: `Bearer ${token}` } });
       setAlerts(Array.isArray(res.data) ? res.data : []);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+    } catch (e) { console.error(e); }
+    finally { setLoading(false); }
   };
 
-  useEffect(() => {
-    fetchAlerts();
-  }, []);
+  useEffect(() => { fetchAlerts(); }, []);
+
+  const showMsg = (type, text) => {
+    setMessage({ type, text });
+    setTimeout(() => setMessage({ type: '', text: '' }), 3500);
+  };
 
   const handleCreate = async (e) => {
     e.preventDefault();
-    if (!token) {
-      alert('Please log in to create wanted alerts');
-      navigate('/login');
-      return;
-    }
-
+    if (!token) { navigate('/login'); return; }
     setSubmitting(true);
-    setMessage('');
     try {
       await axios.post('/api/wanted', {
         keywords,
         category: category === 'All' ? undefined : category,
-        maxPrice: maxPrice ? Number(maxPrice) : undefined
-      }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      setKeywords('');
-      setMaxPrice('');
-      setMessage('Wanted alert created! You will be notified when matching listings appear.');
+        maxPrice: maxPrice ? Number(maxPrice) : undefined,
+      }, { headers: { Authorization: `Bearer ${token}` } });
+      setKeywords(''); setMaxPrice('');
+      showMsg('success', '✅ Alert created! You\'ll be notified when a match appears.');
       fetchAlerts();
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to create alert');
-    } finally {
-      setSubmitting(false);
-    }
+      showMsg('error', err.response?.data?.message || 'Failed to create alert');
+    } finally { setSubmitting(false); }
   };
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`/api/wanted/${id}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await axios.delete(`/api/wanted/${id}`, { headers: { Authorization: `Bearer ${token}` } });
       fetchAlerts();
-    } catch (err) {
-      alert('Failed to delete alert');
-    }
+    } catch { showMsg('error', 'Failed to delete alert'); }
   };
 
   return (
-    <div className="container" style={{ maxWidth: 850, padding: '2rem 1.5rem' }}>
+    <div className="page-main fade-up" style={{ maxWidth: 860 }}>
+      {/* Header */}
       <div style={{ marginBottom: '2rem' }}>
-        <h1 style={{ fontSize: '1.75rem', color: '#f8fafc', marginBottom: '0.5rem' }}>
+        <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '2rem', marginBottom: '0.4rem' }}>
           🎯 Wanted Item Alerts
         </h1>
-        <p style={{ color: '#94a3b8' }}>
-          Looking for surplus items from graduating seniors? Set keyword alerts and get notified as soon as someone posts a match.
+        <p style={{ color: 'var(--text-secondary)' }}>
+          Looking for something specific? Set keyword alerts and get notified the moment a match goes live.
         </p>
       </div>
 
-      {/* Info Card */}
-      <div style={{
-        background: 'rgba(37, 99, 235, 0.1)',
-        border: '1px solid rgba(37, 99, 235, 0.3)',
-        borderRadius: '8px',
-        padding: '1rem',
-        marginBottom: '2rem',
-        fontSize: '0.9rem',
-        color: '#bfdbfe'
-      }}>
-        💡 <strong>How it works:</strong> Whenever a senior publishes an auction matching your keywords or price cap, you'll receive an in-app alert and browser notification.
+      {/* How it works */}
+      <div className="alert alert-info" style={{ marginBottom: '1.5rem' }}>
+        💡 <strong>How it works:</strong> When a seller posts an auction matching your keywords, category, or price cap — you get an instant in-app notification.
       </div>
 
-      {/* Form */}
-      <div style={{
-        background: 'var(--bg-secondary)',
-        padding: '1.5rem',
-        borderRadius: '10px',
-        border: '1px solid var(--border-color)',
-        marginBottom: '2rem'
-      }}>
-        <h2 style={{ fontSize: '1.2rem', marginBottom: '1rem', color: '#f8fafc' }}>+ Create New Alert</h2>
-        {message && <div style={{ color: 'var(--accent-success)', marginBottom: '1rem', fontSize: '0.9rem' }}>{message}</div>}
+      {/* Messages */}
+      {message.text && (
+        <div className={`alert alert-${message.type === 'success' ? 'success' : 'error'}`}>
+          {message.text}
+        </div>
+      )}
 
-        <form onSubmit={handleCreate} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr auto', gap: '0.75rem', alignItems: 'end' }}>
-          <div>
-            <label style={{ display: 'block', fontSize: '0.8rem', color: '#94a3b8', marginBottom: '0.3rem' }}>Keywords (comma separated)</label>
-            <input
-              type="text"
-              placeholder="e.g. cycle, calculator, fridge"
-              value={keywords}
-              onChange={(e) => setKeywords(e.target.value)}
-              required
-              style={{ width: '100%' }}
-            />
-          </div>
-
-          <div>
-            <label style={{ display: 'block', fontSize: '0.8rem', color: '#94a3b8', marginBottom: '0.3rem' }}>Category</label>
-            <select value={category} onChange={(e) => setCategory(e.target.value)} style={{ width: '100%' }}>
-              <option value="All">All Categories</option>
-              <option value="Electronics">Electronics</option>
-              <option value="Cycles">Cycles</option>
-              <option value="Books">Books</option>
-              <option value="Dorm">Dorm Essentials</option>
-              <option value="Other">Other</option>
-            </select>
-          </div>
-
-          <div>
-            <label style={{ display: 'block', fontSize: '0.8rem', color: '#94a3b8', marginBottom: '0.3rem' }}>Max Budget (₹)</label>
-            <input
-              type="number"
-              placeholder="e.g. 2500"
-              value={maxPrice}
-              onChange={(e) => setMaxPrice(e.target.value)}
-              style={{ width: '100%' }}
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={submitting}
-            style={{
-              padding: '0.6rem 1.2rem',
-              background: '#2563eb',
-              color: '#fff',
-              fontWeight: 600,
-              fontSize: '0.9rem',
-              height: '38px'
-            }}
-          >
-            {submitting ? 'Saving...' : 'Set Alert'}
-          </button>
-        </form>
+      {/* Create Form */}
+      <div className="card" style={{ marginBottom: '2rem' }}>
+        <div className="card-body">
+          <h2 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '1.25rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: 1 }}>
+            + Create New Alert
+          </h2>
+          {!token ? (
+            <div style={{ textAlign: 'center', padding: '1.5rem' }}>
+              <Link to="/login" className="btn btn-primary">Sign in to create alerts</Link>
+            </div>
+          ) : (
+            <form onSubmit={handleCreate}>
+              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label className="form-label">Keywords (comma-separated)</label>
+                  <input
+                    id="wanted-keywords"
+                    className="form-input"
+                    placeholder="e.g. cycle, calculator, fridge"
+                    value={keywords}
+                    onChange={e => setKeywords(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label className="form-label">Category</label>
+                  <select id="wanted-category" className="form-input form-select" value={category} onChange={e => setCategory(e.target.value)}>
+                    {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                </div>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label className="form-label">Max Budget (₹)</label>
+                  <input
+                    id="wanted-maxprice"
+                    className="form-input"
+                    type="number"
+                    placeholder="e.g. 2500"
+                    value={maxPrice}
+                    onChange={e => setMaxPrice(e.target.value)}
+                  />
+                </div>
+              </div>
+              <button id="wanted-submit" type="submit" className="btn btn-primary" disabled={submitting}>
+                {submitting ? 'Saving…' : '🔔 Set Alert'}
+              </button>
+            </form>
+          )}
+        </div>
       </div>
 
-      {/* Active Alerts List */}
-      <h2 style={{ fontSize: '1.2rem', marginBottom: '1rem', color: '#f8fafc' }}>Your Active Alerts</h2>
+      {/* Active Alerts */}
+      <div className="section-header">
+        <div>
+          <h2 className="section-title">Your Active Alerts</h2>
+          <p className="section-sub">{alerts.length} alert{alerts.length !== 1 ? 's' : ''} watching</p>
+        </div>
+      </div>
+
       {!token ? (
-        <div style={{ textAlign: 'center', padding: '2rem', background: 'var(--bg-secondary)', borderRadius: '8px' }}>
-          Please <a href="/login" style={{ color: '#38bdf8' }}>log in</a> to view and manage your wanted alerts.
+        <div className="empty-state">
+          <div className="icon">🔐</div>
+          <h3>Sign in to see your alerts</h3>
+          <Link to="/login" className="btn btn-primary" style={{ marginTop: '1rem' }}>Sign In</Link>
         </div>
       ) : loading ? (
-        <p style={{ color: '#94a3b8' }}>Loading alerts...</p>
+        <div className="page-loader"><div className="spinner" /><span>Loading…</span></div>
       ) : alerts.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '2rem', background: 'var(--bg-secondary)', borderRadius: '8px', color: '#94a3b8' }}>
-          You have no active wanted alerts. Add one above to get notified!
+        <div className="empty-state">
+          <div className="icon">🔕</div>
+          <h3>No active alerts</h3>
+          <p>Create one above to be notified when matching items appear.</p>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
           {alerts.map((item) => (
-            <div key={item._id} style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              padding: '1rem 1.25rem',
-              background: 'var(--bg-secondary)',
-              borderRadius: '8px',
-              border: '1px solid var(--border-color)'
-            }}>
-              <div>
-                <strong style={{ fontSize: '1.05rem', color: '#f8fafc' }}>
-                  🔍 {Array.isArray(item.keywords) ? item.keywords.join(', ') : item.keywords}
-                </strong>
-                <div style={{ fontSize: '0.85rem', color: '#94a3b8', marginTop: '0.25rem' }}>
-                  Category: {item.category || 'Any'} {item.maxPrice ? `• Max: ₹${item.maxPrice}` : '• No price limit'}
+            <div key={item._id} className="card">
+              <div className="card-body" style={{ padding: '1rem 1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.3rem' }}>
+                    <span style={{ fontSize: '1.1rem' }}>🔍</span>
+                    <strong style={{ color: 'var(--text-primary)', fontSize: '0.95rem' }}>
+                      {Array.isArray(item.keywords) ? item.keywords.join(', ') : item.keywords}
+                    </strong>
+                    {item.category && item.category !== 'All' && (
+                      <span className="badge badge-new">{item.category}</span>
+                    )}
+                  </div>
+                  <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'flex', gap: '1rem' }}>
+                    <span>Budget: {item.maxPrice ? `up to ₹${item.maxPrice}` : 'No limit'}</span>
+                    <span>Created: {new Date(item.createdAt || Date.now()).toLocaleDateString()}</span>
+                  </div>
                 </div>
+                <button className="btn btn-red btn-sm" onClick={() => handleDelete(item._id)}>
+                  Delete
+                </button>
               </div>
-              <button
-                onClick={() => handleDelete(item._id)}
-                style={{
-                  padding: '0.4rem 0.8rem',
-                  background: 'rgba(239, 68, 68, 0.15)',
-                  color: '#ef4444',
-                  fontSize: '0.85rem',
-                  border: '1px solid rgba(239, 68, 68, 0.3)'
-                }}
-              >
-                Delete
-              </button>
             </div>
           ))}
         </div>
       )}
     </div>
   );
-};
-
-export default Wanted;
+}
