@@ -11,7 +11,11 @@ const app = express();
 app.use(requestLogger);
 app.use(express.json({ limit: '10kb' }));
 app.use(cors({ origin: process.env.CLIENT_ORIGIN, credentials: true }));
-app.use(mongoSanitize());
+app.use((req, res, next) => {
+  if (req.body) req.body = mongoSanitize.sanitize(req.body);
+  if (req.params) req.params = mongoSanitize.sanitize(req.params);
+  next();
+});
 app.use(helmet());
 app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 100 }));
 app.use(cookieParser());

@@ -7,58 +7,78 @@ const Home = () => {
   const navigate = useNavigate();
   const [auctions, setAuctions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const search = location.search ? new URLSearchParams(location.search) : new URLSearchParams();
 
   useEffect(() => {
-    const params = location.search ? new URLSearchParams(location.search) : new URLSearchParams();
     let filter = { status: 'ACTIVE' };
 
-    if (params.get('q')) {
+    if (search.get('q')) {
       filter.$or = [
-        { title: { $regex: params.get('q'), $options: 'i' } },
-        { description: { $regex: params.get('q'), $options: 'i' } },
+        { title: { $regex: search.get('q'), $options: 'i' } },
+        { description: { $regex: search.get('q'), $options: 'i' } },
       ];
     }
-    if (params.get('category')) filter.category = params.get('category');
-    if (params.get('condition')) filter.condition = params.get('condition');
-    if (params.get('min')) filter.currentPrice = { $gte: Number(params.get('min')) };
-    if (params.get('max')) {
-      filter.currentPrice = { ...filter.currentPrice, $lte: Number(params.get('max')) };
+    if (search.get('category')) filter.category = search.get('category');
+    if (search.get('condition')) filter.condition = search.get('condition');
+    if (search.get('min')) filter.currentPrice = { $gte: Number(search.get('min')) };
+    if (search.get('max')) {
+      filter.currentPrice = { ...filter.currentPrice, $lte: Number(search.get('max')) };
     }
 
-    axios.get('/api/auctions', { params }).then((res) => {
+    axios.get('/api/auctions', { params: filter }).then((res) => {
       setAuctions(res.data);
       setLoading(false);
     });
-  }, [params]);
+  }, [search]);
 
   if (loading) return <div>Loading auctions...</div>;
 
-  const formatCountdown = (closesAt) => {
-    const now = new Date();
-    const diff = new Date(closesAt) - now;
-    if (diff <= 0) return 'Closed';
-    const minutes = Math.max(0, Math.floor(diff / 60000));
-    const seconds = Math.max(0, Math.floor((diff % 60000) / 1000));
-    return `${minutes}m ${seconds}s`;
-  };
-
   return (
-    <div style={{ padding: '1rem', maxWidth: 800, margin: '0 auto' }}>
+    <div style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto' }}>
       <h2>Upcoming Auctions</h2>
       <p>Total: {auctions.length}</p>
-      <ul>
+      
+      <div style={{ margin: '1rem 0', display: 'flex', gap: '1rem' }}>
+        <input
+          type="text"
+          placeholder="Search items..."
+          onChange={(e) => {
+            const newSearch = new URLSearchParams(search);
+            newSearch.set('q', e.target.value);
+            navigate(`?${newSearch.toString()}`);
+          }}
+          style={{ flex: 1, padding: '0.5rem', border: '1px solid #ddd', borderRadius: '4px' }}
+        />
+        <button
+          onClick={() => navigate('?reset=true')}
+          style={{ padding: '0.5rem 1rem', background: '#0066cc', color: 'white', border: 'none', borderRadius: '4px' }}
+        >
+          Reset
+        </button>
+      </div>
+
+      <ul style={{ listStyle: 'none', padding: 0, marginTop: '1rem' }}>
         {auctions.map((auc) => (
-          <li key={auc._id} style={{ borderBottom: '1px solid #eee', padding: '0.5rem', marginBottom: '0.5rem' }}>
-            <h3>{auc.title}</h3>
-            <p>₹{auc.currentPrice} - Category: {auc.category || 'General'}</p>
-            <p>Closes: {new Date(auc.closesAt).toLocaleString()}</p>
-            <span>{formatCountdown(auc.closesAt)}</span>
-            <button 
-              style={{ marginTop: '0.5rem', padding: '0.5rem 1rem' }}
-              onClick={() => navigate(`/auction/${auc._id}`)}
-            >
-              View
-            </button>
+          <li key={auc._id} style={{ borderBottom: '1px solid #eee', padding: '1rem', marginBottom: '1rem' }}>
+            <h3 style={{ margin: 0, color: '#333' }}>{auc.title}</h3>
+            <p style={{ color: '#666', margin: '0.5rem 0' }}>
+              ₹{auc.currentPrice} • {auc.category || 'General'} • Closes: {new Date(auc.closesAt).toLocaleString()}
+            </p>
+            <FormatCountdown closesAt={auc.closesAt} />
+            
+            <div style={{ marginTop: '0.5rem' }}>
+              <Link to={`/auction/${auc._id}`} style={{ textDecoration: 'none' }}>
+                <button style={{ padding: '0.5rem 1rem', background: '#0066cc', color: 'white', border: 'none', borderRadius: '4px' }}>
+                  View
+                </button>
+              </Link>
+              
+              {auc.sellerId && auc.sellerId._id && auc.sellerId._id.toString() === localStorage.getItem('userId') ? (
+                <button style={{ padding: '0.5rem 1rem', background: '#6c757d', color: 'white', border: 'none', borderRadius: '4px', marginLeft: '0.5rem' }}>
+                  Manage
+                </button>
+              ) : ''}
+            </div>
           </li>
         ))}
       </ul>
