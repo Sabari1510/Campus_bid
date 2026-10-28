@@ -125,8 +125,7 @@ const AuctionDetail = () => {
         {bids.map((bid) => (
           <li key={bid._id} style={{ margin: '0.5rem 0', padding: '0.5rem', background: '#f8f9fa', borderRadius: '4px' }}>
             <strong>{bid.bidderId && bid.bidderId.name ? bid.bidderId.name : 'Anonymous'}</strong>: ₹{bid.amount}
-            {bid.isAuto && <span style={{ color: '#666', fontSize: '0.8rem' }}> (auto-bid)</span>
-            </span>
+            {bid.isAuto && <span style={{ color: '#666', fontSize: '0.8rem' }}> (auto-bid)</span>}
           </li>
         ))}
       </ul>

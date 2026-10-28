@@ -163,7 +163,7 @@ const CreateListing = () => {
           {photos.length > 0 && photos.map((photo, i) => (
             <div key={i} style={{ margin: '0.5rem 0', display: 'flex', alignItems: 'center' }}>
               <img
-                src={{ URL.createObjectURL(photo) }}
+                src={URL.createObjectURL(photo)}
                 alt="Preview"
                 style={{ width: '80px', height: '60px', objectFit: 'cover', marginRight: '0.5rem', borderRadius: '4px' }}
               />
