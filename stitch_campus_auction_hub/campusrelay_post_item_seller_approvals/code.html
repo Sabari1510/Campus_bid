@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_standard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script><script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "surface-container-highest": "#d3e4fe",
+          "surface-variant": "#d3e4fe",
+          "error-container": "#ffdad6",
+          "error": "#ba1a1a",
+          "on-secondary-fixed-variant": "#003ea8",
+          "inverse-primary": "#b8c7e7",
+          "on-surface-variant": "#44474d",
+          "secondary-fixed-dim": "#b4c5ff",
+          "surface-bright": "#f8f9ff",
+          "outline": "#75777e",
+          "surface-container": "#e5eeff",
+          "primary-fixed-dim": "#b8c7e7",
+          "on-primary-fixed-variant": "#384762",
+          "secondary-container": "#2563eb",
+          "on-tertiary": "#ffffff",
+          "surface-container-low": "#eff4ff",
+          "surface-tint": "#505f7b",
+          "inverse-surface": "#213145",
+          "on-background": "#0b1c30",
+          "on-primary": "#ffffff",
+          "on-primary-fixed": "#0b1b34",
+          "on-primary-container": "#d6e3ff",
+          "on-secondary": "#ffffff",
+          "primary-container": "#0f1f38",
+          "on-secondary-container": "#fefcff",
+          "tertiary": "#100400",
+          "on-error-container": "#93000a",
+          "surface": "#f8f9ff",
+          "primary-fixed": "#d6e3ff",
+          "surface-dim": "#cbdbf5",
+          "secondary": "#2563eb",
+          "surface-container-lowest": "#ffffff",
+          "on-tertiary-fixed-variant": "#6e3900",
+          "tertiary-fixed-dim": "#ffb77d",
+          "outline-variant": "#c5c6ce",
+          "tertiary-fixed": "#fef3c7",
+          "on-surface": "#0b1c30",
+          "on-tertiary-fixed": "#78350f",
+          "background": "#f8f9ff",
+          "secondary-fixed": "#dbe1ff",
+          "on-tertiary-container": "#f59e0b",
+          "surface-container-high": "#dce9ff",
+          "tertiary-container": "#f59e0b",
+          "on-secondary-fixed": "#00174b",
+          "on-error": "#ffffff",
+          "inverse-on-surface": "#eaf1ff",
+          "primary": "#0f1f38"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.125rem",
+          "lg": "0.25rem",
+          "xl": "0.5rem",
+          "full": "0.75rem"
+        },
+        "spacing": {
+          "margin": "2rem",
+          "space-xl": "2.5rem",
+          "space-sm": "0.5rem",
+          "gutter": "1.5rem",
+          "gutter-mobile": "1rem",
+          "space-xs": "0.25rem",
+          "space-md": "1rem",
+          "space-lg": "1.5rem",
+          "margin-mobile": "1rem"
+        },
+        "fontFamily": {
+          "body-lg": ["Inter"],
+          "label-sm": ["Space Grotesk"],
+          "label-md": ["Space Grotesk"],
+          "headline-sm": ["Space Grotesk"],
+          "body-sm": ["Inter"],
+          "display-lg-mobile": ["Space Grotesk"],
+          "headline-md": ["Space Grotesk"],
+          "headline-lg": ["Space Grotesk"],
+          "display-lg": ["Space Grotesk"],
+          "headline-lg-mobile": ["Space Grotesk"],
+          "label-lg": ["Space Grotesk"],
+          "body-md": ["Inter"],
+          "label-ticker": ["Space Grotesk"],
+          "label-numeric": ["Space Grotesk"],
+          "label-caption": ["Inter"]
+        },
+        "fontSize": {
+          "body-lg": ["1.125rem", {"lineHeight": "1.75rem", "fontWeight": "400"}],
+          "label-sm": ["0.6875rem", {"lineHeight": "0.875rem", "letterSpacing": "0.08em", "fontWeight": "700"}],
+          "label-md": ["0.75rem", {"lineHeight": "1rem", "letterSpacing": "0.05em", "fontWeight": "700"}],
+          "headline-sm": ["1.25rem", {"lineHeight": "1.75rem", "fontWeight": "600"}],
+          "body-sm": ["0.875rem", {"lineHeight": "1.25rem", "fontWeight": "400"}],
+          "headline-md": ["1.5rem", {"lineHeight": "2rem", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+          "headline-lg": ["2rem", {"lineHeight": "2.5rem", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+          "display-lg": ["3.5rem", {"lineHeight": "4rem", "letterSpacing": "-0.03em", "fontWeight": "700"}],
+          "label-lg": ["0.875rem", {"lineHeight": "1.25rem", "letterSpacing": "0.02em", "fontWeight": "600"}],
+          "body-md": ["1rem", {"lineHeight": "1.5rem", "fontWeight": "400"}],
+          "label-caption": ["0.75rem", {"lineHeight": "1rem", "fontWeight": "500"}],
+          "label-ticker": ["0.75rem", {"lineHeight": "1rem", "letterSpacing": "0.05em", "fontWeight": "700"}],
+          "label-numeric": ["0.875rem", {"lineHeight": "1.25rem", "fontWeight": "700"}]
+        }
+      }
+    }
+  }
+</script></head><body class="bg-surface font-body-md text-on-surface antialiased"><header class="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.06)] border-b border-surface-container"><div class="bg-primary text-on-primary py-space-xs px-margin"><div class="max-w-7xl mx-auto flex items-center justify-between font-label-ticker text-label-ticker"><div class="flex items-center gap-space-sm"><span class="inline-block w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span><span>🎓 Senior Departure Countdown: 4 Days Left • 182 Lots Closing Today • Anti-Snipe 30s Extension Active</span></div><div class="hidden md:flex items-center gap-space-md text-amber-300"><span>ESCROW VERIFIED BY STUDENT SENATE</span><span class="text-on-primary opacity-40">|</span><span>NEXT DROP: 18:00 IST</span></div></div></div><div class="h-20 max-w-7xl mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop flex items-center justify-between gap-space-md"><div class="flex items-center gap-space-md shrink-0"><a class="flex items-center gap-space-sm" data-path="live-auctions" href="#"><img alt="CampusRelay Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1UUrdg6zozKiKcawUuKY0ZmlVK3yBl0pm7wAn8He0d2AWBmU4XWcKnLRLR44KXwM6IW3wsMjwEVsmhEHdCmcanLzr6fM7RbKiKvUIBA1f9fg-uPzERKx8Mk_WCfkLTkh9c2OSnFk50WSVxc51fjefjdpmna6QKarq8eQi6ss3n5upKwxoxSBsQ5GKwWiDDdNLEpOIiaCfTcz7oJqL1LVsIpVRAdqF50PlyFu01eUPXhJw"/><span class="font-headline-sm text-headline-sm text-primary font-bold tracking-tight">CampusRelay</span></a><div class="hidden xl:flex items-center gap-space-xs px-space-sm py-space-xs bg-surface-container-high rounded-full border border-outline-variant/30 text-on-surface-variant font-label-caption text-label-caption"><span class="material-symbols-outlined text-sm text-secondary">school</span><span>IIT Bombay / North Campus - Graduation Week Exit Sales</span></div></div><div class="hidden lg:flex flex-1 max-w-md mx-space-sm"><div class="relative w-full"><span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-base">search</span><input class="w-full pl-9 pr-4 py-2 bg-surface-container-low rounded-lg text-body-sm font-body-sm text-on-surface placeholder:text-on-surface-variant/70 focus:outline-none focus:ring-2 focus:ring-secondary focus:bg-surface-container-lowest transition-all" placeholder="Search cycles, mini-fridges, notes, lab gear... (Press '/' to trigger)" type="text"/></div></div><nav class="hidden 2xl:flex items-center gap-space-xs" data-active-classes="bg-primary-container text-on-primary-container font-semibold rounded-lg"><a class="px-3 py-2 rounded-lg text-body-sm font-body-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors" data-path="live-auctions" href="#">Live Auctions</a><a class="px-3 py-2 rounded-lg text-body-sm font-body-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors" data-path="ai-assistant" href="#">AI Assistant</a><a class="px-3 py-2 rounded-lg text-body-sm font-body-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors" data-path="watchlist-and-alerts" href="#">Watchlist &amp; Alerts</a><a class="px-3 py-2 rounded-lg text-body-sm font-body-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors" data-path="my-listings-post-item" href="#">My Listings / Post Item</a><a class="px-3 py-2 rounded-lg text-body-sm font-body-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors" data-path="handover-and-escrow" href="#">Handover &amp; Escrow</a></nav><div class="flex items-center gap-space-sm shrink-0"><div class="relative group"><button aria-label="Notifications" class="relative p-2 rounded-full text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors" type="button"><span class="material-symbols-outlined text-xl">notifications</span><span class="absolute top-1 right-1 w-2.5 h-2.5 bg-amber-500 rounded-full ring-2 ring-surface"></span></button><div class="hidden group-hover:block absolute right-0 mt-2 w-80 p-3 bg-surface-container-lowest rounded-xl shadow-lg border border-outline-variant/30 text-left z-50"><div class="flex items-start gap-2"><span class="material-symbols-outlined text-amber-600 text-sm mt-0.5">update</span><div><p class="font-label-ticker text-label-ticker text-amber-700">Anti-Snipe +30s triggered</p><p class="font-body-sm text-body-sm text-on-surface">Hercules Roadeo Gear Cycle extended due to last-second junior bid.</p></div></div></div></div><div class="h-8 w-[1px] bg-outline-variant/40 hidden sm:block"></div><div class="flex items-center gap-space-sm pl-space-xs"><div class="hidden sm:flex flex-col text-right"><span class="font-headline-sm text-body-sm font-bold text-on-surface leading-tight">Aarav S.</span><span class="font-label-caption text-label-caption text-secondary font-semibold">Hostel 12 • Class '24</span></div><div class="relative"><img alt="Profile" class="w-8 h-8 rounded-full object-cover ring-2 ring-secondary/30" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCI-_ZrHJ-hNQ6dae4CmzIFwD7lpPH35ldDuPfOddKWfkKRBaEbei74amo4s8lRL7fxHLHLR-_mIsdr0mXphCIYSmzImn6SQ1Gw-uVAFQmuTL1K8AnHlgRPLt_nd6qzwjHby0sYI0OzmVWRG__pAMWvR8TgY7a5W4SGNGmg2-c828WWt2ZabDpeyAyTD5YzuulRd7yKNBhMuvIjUqnF1NTCe_SM80bcuVG_L_n_bzw2"/><span class="absolute -bottom-1 -right-1 bg-secondary text-on-secondary rounded-full p-0.5" title="Verified Senior Seller"><span class="material-symbols-outlined text-[10px] block">verified</span></span></div></div></div></div></header><main class="w-full pt-20 bg-surface"><div class="flex flex-col w-full">
+<!-- Top Operational Banner & Senior Departure Context -->
+<section class="w-full bg-surface-container px-margin md:px-margin-tablet lg:px-margin-desktop py-space-lg border-b border-surface-container-high">
+<div class="max-w-7xl mx-auto flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-md">
+<div class="w-12 h-12 rounded-xl bg-primary flex items-center justify-center text-on-primary shadow-md">
+<span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 1;">outbox</span>
+</div>
+<div>
+<div class="flex items-center gap-space-xs font-label-ticker text-label-ticker text-secondary font-bold uppercase tracking-wider">
+<span>IITB Convocation Clearance Hub</span>
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span>Batch '24 Express Outgoing</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-primary">Senior Exit Post &amp; Manage</h1>
+</div>
+</div>
+<!-- Metrics Pills Strip -->
+<div class="flex flex-wrap items-center gap-space-sm font-label-ticker text-label-ticker">
+<div class="px-space-md py-space-xs bg-surface-container-lowest rounded-full shadow-sm flex items-center gap-space-xs border border-surface-container-high">
+<span class="material-symbols-outlined text-base text-secondary">inventory_2</span>
+<span class="text-on-surface-variant">Active Lots:</span>
+<span class="font-bold text-primary">3</span>
+</div>
+<div class="px-space-md py-space-xs bg-surface-container-lowest rounded-full shadow-sm flex items-center gap-space-xs border border-surface-container-high">
+<span class="material-symbols-outlined text-base text-amber-600">payments</span>
+<span class="text-on-surface-variant">Escrow Held:</span>
+<span class="font-bold text-amber-700">₹1,070</span>
+</div>
+<div class="px-space-md py-space-xs bg-primary text-on-primary rounded-full shadow-sm flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-base text-amber-400">flight_takeoff</span>
+<span>Room Handover: 4 Days</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Main Multi-Column Split Workzone -->
+<div class="max-w-7xl w-full mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop py-space-xl">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-xl items-start">
+<!-- LEFT WORKZONE: Quick List Senior Gear (7 Cols) -->
+<div class="lg:col-span-7 flex flex-col gap-space-lg">
+<!-- Creator Form Card -->
+<div class="bg-surface-container-lowest rounded-xl shadow-md border border-surface-container p-space-lg md:p-space-xl">
+<div class="flex items-start justify-between gap-space-md mb-space-lg">
+<div>
+<div class="flex items-center gap-space-xs text-secondary font-label-ticker text-label-ticker mb-1 font-bold">
+<span class="material-symbols-outlined text-sm">bolt</span>
+<span>RAPID SENIOR CLEARANCE ENGINE</span>
+</div>
+<h2 class="font-headline-md text-headline-md text-primary">List Your Senior Gear</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Auto-verified campus auction lot. Bidders locked to campus student IDs.</p>
+</div>
+<span class="px-space-sm py-space-xs rounded-full bg-amber-100 text-amber-900 border border-amber-300 font-label-caption text-label-caption font-bold">
+              Avg Sell Time: 3.8 hrs
+            </span>
+</div>
+<form class="flex flex-col gap-space-lg" id="create-listing-form" onsubmit="event.preventDefault(); triggerPublishListing();">
+<!-- Title Field -->
+<div class="flex flex-col gap-1.5">
+<label class="font-label-ticker text-label-ticker text-primary flex items-center justify-between font-bold">
+<span>ITEM TITLE &amp; MODEL SPEC</span>
+<span class="text-on-surface-variant opacity-70 font-normal">Mandatory</span>
+</label>
+<div class="relative">
+<input class="w-full h-12 px-4 bg-surface-container-low rounded-lg text-body-md font-body-md text-on-surface placeholder:text-on-surface-variant/60 focus:bg-surface-container-lowest focus:ring-2 focus:ring-secondary focus:outline-none transition-all shadow-inner border border-surface-container" id="listing-title" placeholder="e.g., Firefox Road Bike, Casio FX-991CW, Ergonomic Mesh Chair" required="" type="text"/>
+</div>
+</div>
+<!-- Category Selector (Custom Chips) -->
+<div class="flex flex-col gap-1.5">
+<label class="font-label-ticker text-label-ticker text-primary font-bold">SELECT CATEGORY</label>
+<div class="grid grid-cols-2 sm:grid-cols-3 gap-2" id="category-selector">
+<button class="cat-pill px-3 py-2.5 rounded-lg bg-surface-container text-left flex items-center gap-2 hover:bg-surface-container-high transition-all text-on-surface" onclick="selectCategory(this, 'Cycle')" type="button">
+<span class="material-symbols-outlined text-base text-secondary">pedal_bike</span>
+<span class="font-body-sm text-body-sm font-semibold">Cycle</span>
+</button>
+<button class="cat-pill px-3 py-2.5 rounded-lg bg-primary text-on-primary text-left flex items-center gap-2 transition-all shadow-sm ring-2 ring-primary/20" onclick="selectCategory(this, 'Calculator')" type="button">
+<span class="material-symbols-outlined text-base text-amber-400">calculate</span>
+<span class="font-body-sm text-body-sm font-semibold">Calculator</span>
+</button>
+<button class="cat-pill px-3 py-2.5 rounded-lg bg-surface-container text-left flex items-center gap-2 hover:bg-surface-container-high transition-all text-on-surface" onclick="selectCategory(this, 'Books')" type="button">
+<span class="material-symbols-outlined text-base text-secondary">menu_book</span>
+<span class="font-body-sm text-body-sm font-semibold">Books</span>
+</button>
+<button class="cat-pill px-3 py-2.5 rounded-lg bg-surface-container text-left flex items-center gap-2 hover:bg-surface-container-high transition-all text-on-surface" onclick="selectCategory(this, 'Hostel Appliances')" type="button">
+<span class="material-symbols-outlined text-base text-secondary">kettle</span>
+<span class="font-body-sm text-body-sm font-semibold">Hostel App</span>
+</button>
+<button class="cat-pill px-3 py-2.5 rounded-lg bg-surface-container text-left flex items-center gap-2 hover:bg-surface-container-high transition-all text-on-surface" onclick="selectCategory(this, 'Electronics')" type="button">
+<span class="material-symbols-outlined text-base text-secondary">devices</span>
+<span class="font-body-sm text-body-sm font-semibold">Electronics</span>
+</button>
+<button class="cat-pill px-3 py-2.5 rounded-lg bg-surface-container text-left flex items-center gap-2 hover:bg-surface-container-high transition-all text-on-surface" onclick="selectCategory(this, 'Lab Gear')" type="button">
+<span class="material-symbols-outlined text-base text-secondary">science</span>
+<span class="font-body-sm text-body-sm font-semibold">Lab Gear</span>
+</button>
+</div>
+</div>
+<!-- Condition Radios / Selector -->
+<div class="flex flex-col gap-1.5">
+<label class="font-label-ticker text-label-ticker text-primary font-bold">HOSTEL WEAR &amp; CONDITION</label>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-2" id="condition-selector">
+<label class="cond-card flex items-start gap-3 p-3 rounded-lg bg-surface-container-low cursor-pointer hover:bg-surface-container transition-all border border-transparent">
+<input class="mt-1 accent-secondary" name="condition" type="radio" value="Brand New"/>
+<div>
+<span class="font-body-sm text-body-sm font-semibold block text-on-surface">Brand New</span>
+<span class="font-label-caption text-label-caption text-on-surface-variant">Box unopened, unused surplus</span>
+</div>
+</label>
+<label class="cond-card flex items-start gap-3 p-3 rounded-lg bg-amber-50/70 border-2 border-amber-500 cursor-pointer transition-all shadow-sm">
+<input checked="" class="mt-1 accent-amber-600" name="condition" type="radio" value="Like New"/>
+<div>
+<span class="font-body-sm text-body-sm font-bold block text-primary">Like New (Used 1 sem)</span>
+<span class="font-label-caption text-label-caption text-amber-900 font-medium">Pristine body, full working condition</span>
+</div>
+</label>
+<label class="cond-card flex items-start gap-3 p-3 rounded-lg bg-surface-container-low cursor-pointer hover:bg-surface-container transition-all border border-transparent">
+<input class="mt-1 accent-secondary" name="condition" type="radio" value="Well Used"/>
+<div>
+<span class="font-body-sm text-body-sm font-semibold block text-on-surface">Battle Tested / Well Used</span>
+<span class="font-label-caption text-label-caption text-on-surface-variant">Hostel scratches, 100% reliable</span>
+</div>
+</label>
+<label class="cond-card flex items-start gap-3 p-3 rounded-lg bg-surface-container-low cursor-pointer hover:bg-surface-container transition-all border border-transparent">
+<input class="mt-1 accent-secondary" name="condition" type="radio" value="Needs Tuneup"/>
+<div>
+<span class="font-body-sm text-body-sm font-semibold block text-on-surface">Needs Minor Tuneup</span>
+<span class="font-label-caption text-label-caption text-on-surface-variant">Chain oiling, battery swap needed</span>
+</div>
+</label>
+</div>
+</div>
+<!-- Photo Upload Dropzone with Sample Images -->
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center justify-between font-label-ticker text-label-ticker">
+<span class="text-primary font-bold">PHOTO VERIFICATION (UP TO 4)</span>
+<span class="text-secondary font-bold">Campus Geotag Auto-Detected</span>
+</div>
+<div class="p-4 rounded-xl bg-surface-container-low border border-surface-container flex flex-col gap-3">
+<div class="flex flex-col sm:flex-row items-center justify-center gap-3 p-6 rounded-lg bg-surface-container-lowest shadow-inner text-center cursor-pointer hover:bg-surface-bright transition-all border border-dashed border-secondary/40">
+<div class="w-12 h-12 rounded-full bg-secondary-fixed flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-2xl">add_a_photo</span>
+</div>
+<div class="text-left">
+<p class="font-body-sm text-body-sm font-bold text-primary">Drag &amp; drop hostel photos, or browse</p>
+<p class="font-label-caption text-label-caption text-on-surface-variant">Clear pictures boost final bids by up to 43%</p>
+</div>
+</div>
+<!-- Sample Attached Photos Grid -->
+<div class="grid grid-cols-3 gap-2">
+<div class="relative group rounded-lg overflow-hidden aspect-video bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="A scientific calculator Casio fx-991EX sitting on a neat wooden study table with university notes in the background, sharp crisp lighting, collegiate vibe, photorealistic product shot." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDb0rYtPVQWhP6sx4bDNv9T_43_GL9ER2QcbDHfQkP3erhHBlQWjFNZ1588XCElYUbZ45OXo8WCIK_szFuTFvUYsP4DrXcquNCo6TQDReSvP9aVTbmcJqMwj8jhPMc32Yr4nqvEN4V3yMvrKbdsEGjC_djZw0lRJ9YP3jGbaIxnfTIemsHRx0q6eql6QFFbGHWx-PGuPPsFFf-bQsNwBz0x9Dq5uJiG3-l_sVj3TVzy"/>
+<div class="absolute bottom-1 left-1 bg-primary/90 text-on-primary backdrop-blur-md px-1.5 py-0.5 rounded text-[10px] font-label-ticker">Main #1</div>
+<button class="absolute top-1 right-1 bg-error text-on-error rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity" type="button">
+<span class="material-symbols-outlined text-xs">close</span>
+</button>
+</div>
+<div class="relative group rounded-lg overflow-hidden aspect-video bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="Rear serial code sticker of an electronic scientific device on hostel desktop, crisp macro focus, pristine condition, college tech aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuClx8ulbu3srBttRYpBrn91CkMviw7d7-X88-bFfeMJiN_ROLsMS6L0pNJS6XnYdL3XSx_J_yJkwxfome2l0EETHG95btlrm3X-Kt7wqzsysdSVSCwqC7VMCjZBcpEWiSbjHqokiiQNI7njNzsrOu1qzu-TGLIESx91nwXW0ZtWPWRlqWgIOjwCy4wwkaDhyAtlohoLbT1H7EkNX0g2VmDXwL53W0UjiNfyH4A2-951"/>
+<div class="absolute bottom-1 left-1 bg-surface/90 backdrop-blur-md px-1.5 py-0.5 rounded text-[10px] font-label-ticker text-on-surface-variant">Serial ID</div>
+</div>
+<div class="rounded-lg bg-surface-container flex flex-col items-center justify-center text-on-surface-variant hover:text-secondary cursor-pointer transition-colors p-2 text-center">
+<span class="material-symbols-outlined text-xl mb-1 text-secondary">add_circle</span>
+<span class="font-label-caption text-label-caption font-semibold">+ Add Angle</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Price & Bid Increment Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-space-md">
+<div class="flex flex-col gap-1.5">
+<label class="font-label-ticker text-label-ticker text-primary font-bold">RESERVE / STARTING PRICE (₹)</label>
+<div class="relative flex items-center">
+<span class="absolute left-3.5 font-label-numeric text-label-numeric font-bold text-secondary">₹</span>
+<input class="w-full h-12 pl-8 pr-4 bg-surface-container-low rounded-lg font-label-numeric text-label-numeric font-bold text-on-surface focus:bg-surface-container-lowest focus:ring-2 focus:ring-secondary focus:outline-none transition-all shadow-inner border border-surface-container" id="reserve-price-input" min="10" required="" step="10" type="number" value="400"/>
+</div>
+</div>
+<div class="flex flex-col gap-1.5">
+<label class="font-label-ticker text-label-ticker text-primary font-bold">MINIMUM BID INCREMENT</label>
+<div class="flex items-center gap-1.5 h-12 bg-surface-container-low rounded-lg p-1 border border-surface-container">
+<button class="inc-btn flex-1 h-full rounded text-center font-label-ticker text-label-ticker font-bold text-on-surface hover:bg-surface-container transition-all" onclick="setIncrement(this, 20)" type="button">
+                    +₹20
+                  </button>
+<button class="inc-btn flex-1 h-full rounded text-center font-label-ticker text-label-ticker font-bold bg-primary text-on-primary shadow-sm transition-all" onclick="setIncrement(this, 50)" type="button">
+                    +₹50
+                  </button>
+<button class="inc-btn flex-1 h-full rounded text-center font-label-ticker text-label-ticker font-bold text-on-surface hover:bg-surface-container transition-all" onclick="setIncrement(this, 100)" type="button">
+                    +₹100
+                  </button>
+</div>
+</div>
+</div>
+<!-- Auction Duration Selector -->
+<div class="flex flex-col gap-1.5">
+<label class="font-label-ticker text-label-ticker text-primary flex items-center justify-between font-bold">
+<span>AUCTION DURATION &amp; SENIOR FAREWELL PRESET</span>
+<span class="text-amber-600 font-bold">Auto-closes Before Flight</span>
+</label>
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-2" id="duration-selector">
+<button class="dur-pill p-3 rounded-lg bg-surface-container-low text-left flex flex-col hover:bg-surface-container transition-all border border-transparent" onclick="selectDuration(this)" type="button">
+<span class="font-label-numeric text-label-numeric font-bold text-on-surface">24h Flash Exit</span>
+<span class="font-label-caption text-label-caption text-on-surface-variant">Closes Tomorrow 18:00</span>
+</button>
+<button class="dur-pill p-3 rounded-lg bg-primary text-on-primary text-left flex flex-col shadow-sm transition-all ring-2 ring-primary/20" onclick="selectDuration(this)" type="button">
+<span class="font-label-numeric text-label-numeric font-bold text-amber-400">48h Standard</span>
+<span class="font-label-caption text-label-caption text-on-primary-container">Ideal for cycle/electronics</span>
+</button>
+<button class="dur-pill p-3 rounded-lg bg-surface-container-low text-left flex flex-col hover:bg-surface-container transition-all border border-transparent" onclick="selectDuration(this)" type="button">
+<span class="font-label-numeric text-label-numeric font-bold text-on-surface">Farewell Close</span>
+<span class="font-label-caption text-label-caption text-on-surface-variant">Final Night (Sunday 22:00)</span>
+</button>
+</div>
+</div>
+<!-- Anti-Snipe & Safe Handover Rules Box -->
+<div class="p-4 rounded-xl bg-surface-container flex flex-col gap-3 border border-surface-container-high">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary">security_update_good</span>
+<div>
+<h4 class="font-body-sm text-body-sm font-bold text-primary">Anti-Snipe Protection Active</h4>
+<p class="font-label-caption text-label-caption text-on-surface-variant">Late bids in last 30s auto-extend clock by +60s to ensure fair price.</p>
+</div>
+</div>
+<!-- Toggle switch -->
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" id="anti-snipe-toggle" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-dim peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-surface-container-lowest after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-surface-container-lowest after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-secondary"></div>
+</label>
+</div>
+<div class="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+<label class="font-label-ticker text-label-ticker text-primary font-bold">DESIGNATED HANDOVER SPOT</label>
+<select class="px-3 py-2 bg-surface-container-lowest rounded-lg font-body-sm text-body-sm font-semibold text-on-surface focus:outline-none focus:ring-2 focus:ring-secondary shadow-sm border border-surface-container" id="handover-spot-select">
+<option value="H12">Hostel 12 Common Room</option>
+<option value="GATE">Campus Main Gate Guard Post</option>
+<option value="LIB">Central Library Ground Foyer</option>
+<option value="SAC">SAC Cafeteria Outdoor Quad</option>
+</select>
+</div>
+</div>
+<!-- Submit CTA Strip -->
+<div class="flex flex-col sm:flex-row items-center justify-between gap-space-md pt-space-xs">
+<div class="flex items-center gap-2 text-on-surface-variant font-label-caption text-label-caption">
+<span class="material-symbols-outlined text-base text-secondary">verified_user</span>
+<span>Funds held in Campus Escrow until OTP verified.</span>
+</div>
+<button class="w-full sm:w-auto px-space-xl py-3.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-slate-950 font-headline-sm text-headline-sm font-bold shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 group ring-2 ring-amber-400/40" type="submit">
+<span>Launch Live Auction</span>
+<span class="material-symbols-outlined text-lg group-hover:translate-x-1 transition-transform">rocket_launch</span>
+</button>
+</div>
+</form>
+</div>
+</div>
+<!-- RIGHT WORKZONE: Seller Control Panel & Closing Approvals (5 Cols) -->
+<div class="lg:col-span-5 flex flex-col gap-space-lg">
+<!-- Live Action Status Header -->
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-secondary animate-pulse"></span>
+<h2 class="font-headline-sm text-headline-sm text-primary">My Active Listings</h2>
+</div>
+<span class="font-label-ticker text-label-ticker text-on-surface-variant">3 ITEMS IN PIPELINE</span>
+</div>
+<!-- LISTING 1: AUCTION ENDED - REQUIRES APPROVAL (Hero Card) -->
+<div class="bg-surface-container-lowest rounded-xl shadow-md border border-surface-container p-space-md flex flex-col gap-space-md relative overflow-hidden" id="card-calculator">
+<div class="absolute top-0 left-0 right-0 h-1.5 bg-amber-500"></div>
+<div class="flex items-start justify-between gap-space-sm pt-1">
+<div class="flex gap-3">
+<div class="w-16 h-16 rounded-lg overflow-hidden shrink-0 bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="Close up of a Casio fx-991EX scientific calculator on a study desk, screen active with math equations, crisp focus, college engineering stationery." src="https://lh3.googleusercontent.com/aida-public/AB6AXuATClamprzo8HzMZodDHCuO6EucR_te06TpVcDS6EI3o1RrQRUrVcWVwfW8cDeIb7Z-PsKxtycI-LX4C8tIR8eyHN65Wxn4yo02JdwBUtBnotBQVCQdlpmt-iiAG7XrqHQK4396pT_79Fw1IfjGV3j-nAEywxua65SL4BfkOQc4isLKoSLSkWIp0ewDg6LmCv2NP9iS3HAbYFYSh9bKC1U7-23yRvDm6lX22krC7_ht"/>
+</div>
+<div>
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300 font-label-ticker text-label-ticker font-bold mb-1">
+<span class="material-symbols-outlined text-xs text-amber-700">gavel</span>
+                  AUCTION ENDED • PENDING APPROVAL
+                </span>
+<h3 class="font-headline-sm text-body-lg font-bold text-primary">Casio fx-991EX Calculator</h3>
+<p class="font-label-caption text-label-caption text-on-surface-variant">Ended 14 mins ago • 19 competitive bids</p>
+</div>
+</div>
+</div>
+<!-- Winner & Bid Breakdown Box -->
+<div class="p-3 bg-surface-container-low rounded-lg flex items-center justify-between border border-surface-container">
+<div class="flex items-center gap-2.5">
+<div class="w-9 h-9 rounded-full bg-secondary-fixed text-on-secondary-fixed flex items-center justify-center font-bold text-sm">
+                NK
+              </div>
+<div>
+<div class="flex items-center gap-1">
+<span class="font-body-sm text-body-sm font-bold text-on-surface">Neha K.</span>
+<span class="material-symbols-outlined text-xs text-secondary" title="Student ID Verified">verified</span>
+</div>
+<span class="font-label-caption text-label-caption text-on-surface-variant">Mech '26 • Hostel 15</span>
+</div>
+</div>
+<div class="text-right">
+<span class="font-label-caption text-label-caption text-on-surface-variant block uppercase font-semibold">Winning Offer</span>
+<span class="font-headline-md text-headline-md text-amber-600 font-bold">₹720</span>
+</div>
+</div>
+<!-- Escrow Status Callout -->
+<div class="flex items-center gap-2 text-xs font-label-ticker text-amber-800">
+<span class="material-symbols-outlined text-sm text-amber-600">lock_clock</span>
+<span>Buyer UPI amount held in Senate Escrow. Release via OTP.</span>
+</div>
+<!-- Action CTA Group -->
+<div class="flex flex-col gap-2 pt-1" id="approval-actions-box">
+<div class="grid grid-cols-2 gap-2">
+<button class="px-3 py-2.5 rounded-lg bg-primary hover:bg-secondary text-on-primary font-body-sm text-body-sm font-bold shadow-sm transition-all flex items-center justify-center gap-1.5" onclick="handleApproveWinning('Casio fx-991EX', 'Neha K.', 720)" type="button">
+<span class="material-symbols-outlined text-sm text-amber-400">check_circle</span>
+<span>Approve &amp; Reserve</span>
+</button>
+<button class="px-3 py-2.5 rounded-lg bg-surface-container text-on-surface font-body-sm text-body-sm font-semibold hover:bg-surface-container-high transition-all flex items-center justify-center gap-1.5 border border-surface-container-high" onclick="handleRejectWinning('Casio fx-991EX')" type="button">
+<span class="material-symbols-outlined text-sm text-error">cancel</span>
+<span>Reject Bid</span>
+</button>
+</div>
+<button class="w-full py-1.5 text-center font-label-caption text-label-caption text-on-surface-variant hover:text-secondary transition-colors flex items-center justify-center gap-1" onclick="handleRelist('Casio fx-991EX')" type="button">
+<span class="material-symbols-outlined text-xs">restart_alt</span>
+<span>Mark Unsold &amp; Re-list with 24h timer</span>
+</button>
+</div>
+</div>
+<!-- LISTING 2: LIVE AUCTION RUNNING -->
+<div class="bg-surface-container-lowest rounded-xl shadow-md border border-surface-container p-space-md flex flex-col gap-space-sm relative" id="card-jug">
+<div class="flex items-start justify-between gap-space-sm">
+<div class="flex gap-3">
+<div class="w-16 h-16 rounded-lg overflow-hidden shrink-0 bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="Milton 10 liter insulated bright orange and white plastic water jug in a tidy dorm room, student beverage container, collegiate life, photorealistic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCUNJ6lUNMzLJrqKNYmaJGUGeSZhVaO2pLeNyBniAkLLqyxrSCfnMT3TK-aVwFty38K8juyueKFuUzwHckk3yArjhWVqdXAZn4Cj4GpNBwVwFh0qXwBswNFrr30oKeTnV7de1Jzx4sAsLceVL4RuVvzD7qHs-rqxiLMGsbPtryAhXQtZSm-0kIkL8Rnp8VPt226k0XQyzOzlLccwqaogi91L9gHI0pc7gCqHQ1axiW3"/>
+</div>
+<div>
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-900 border border-blue-200 font-label-ticker text-label-ticker font-bold mb-1">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary animate-ping"></span>
+                  LIVE AUCTION • 4h REMAINING
+                </span>
+<h3 class="font-headline-sm text-body-lg font-bold text-primary">Milton 10L Insulated Jug</h3>
+<p class="font-label-caption text-label-caption text-on-surface-variant">Anti-Snipe +30s armed • 8 active bidders</p>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between p-2.5 bg-surface-container-low rounded-lg font-label-ticker border border-surface-container">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-base">trending_up</span>
+<span class="text-body-sm font-semibold text-on-surface">Leader: Rahul V. (H14)</span>
+</div>
+<div class="text-right">
+<span class="font-headline-sm text-headline-sm font-bold text-secondary">₹280</span>
+</div>
+</div>
+<!-- Actions -->
+<div class="flex items-center justify-end gap-2 pt-1">
+<button class="px-3 py-1.5 rounded-lg bg-surface-container text-on-surface font-body-sm text-body-sm font-semibold hover:bg-surface-container-high transition-all flex items-center gap-1" onclick="editLiveAuction('Milton 10L Insulated Jug')" type="button">
+<span class="material-symbols-outlined text-sm text-secondary">edit</span>
+<span>Edit Details</span>
+</button>
+<button class="px-3 py-1.5 rounded-lg bg-error-container text-error font-body-sm text-body-sm font-semibold hover:bg-error/20 transition-all flex items-center gap-1" onclick="cancelLiveAuction('Milton 10L Insulated Jug')" type="button">
+<span class="material-symbols-outlined text-sm">close</span>
+<span>Cancel Auction</span>
+</button>
+</div>
+</div>
+<!-- LISTING 3: HANDOVER COMPLETED -->
+<div class="bg-surface-container-low rounded-xl p-space-md flex flex-col gap-space-xs border border-surface-container opacity-90" id="card-lamp">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-lg overflow-hidden shrink-0 bg-surface-container opacity-80">
+<img class="w-full h-full object-cover" data-alt="A flexible study desk table lamp with a multi-plug surge protector placed on a campus desk, warm ambient lighting, collegiate study nook." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCywlPfV4LOI8Xmpt6TBWDJonspRGIHTDIwVBSzXTfHT_7jkX4BPh1JMXHiG6JEzRgKMUrsvN8w1T7u1SQJjKEN5-QxY0F5_86w6OeDQrB6HEtqNkZPdh7YNi5Z316_RHmXdStOk6YXVOeoAB4-WCO4KbzWg5FHrCEFYmfrfZrvthoahTra85_OCyRw37oFtB4s7j7IZrwErUugj-elNoy0P_3X0xK59HXVxWYspjs3"/>
+</div>
+<div>
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-secondary text-sm">task_alt</span>
+<span class="font-label-ticker text-label-ticker text-secondary font-bold uppercase">Sale Closed &amp; Settled</span>
+</div>
+<h4 class="font-body-md text-body-md font-bold text-primary">Hostel Table Lamp &amp; Multi-Plug</h4>
+</div>
+</div>
+<span class="font-label-numeric text-label-numeric font-bold text-primary">₹350</span>
+</div>
+<div class="mt-1 pt-2 flex items-center justify-between text-on-surface-variant font-label-caption text-label-caption">
+<span>OTP Handover verified at H12 Quad</span>
+<span class="text-secondary font-semibold">Funds Transferred to UPI ID</span>
+</div>
+</div>
+<!-- Visual Analytics Card: Escrow Payout Timeline -->
+<div class="p-space-md rounded-xl bg-surface-container-lowest shadow-sm border border-surface-container flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<span class="font-label-ticker text-label-ticker text-primary uppercase font-bold">Senior Exit Clearance Meter</span>
+<span class="font-label-numeric text-label-numeric text-secondary font-bold">66% Completed</span>
+</div>
+<!-- Inline Mini Visual Chart -->
+<div class="w-full bg-surface-container rounded-full h-3 overflow-hidden flex">
+<div class="bg-secondary h-full" style="width: 33%" title="Completed Settled"></div>
+<div class="bg-amber-500 h-full" style="width: 33%" title="Pending Approval"></div>
+<div class="bg-surface-container-high h-full" style="width: 34%" title="In Bidding"></div>
+</div>
+<div class="flex items-center justify-between font-label-caption text-label-caption text-on-surface-variant pt-1">
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span>Settled (₹350)</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-amber-500"></span>
+<span>Review (₹720)</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-surface-container-high border border-outline"></span>
+<span>Live (₹280)</span>
+</div>
+</div>
+</div>
+<!-- Educational Card: Why Sellers Love CampusRelay -->
+<div class="p-space-lg rounded-xl bg-gradient-to-br from-surface-container to-surface-container-high shadow-sm border border-surface-container-high relative overflow-hidden">
+<div class="w-10 h-10 rounded-full bg-primary text-on-primary flex items-center justify-center mb-space-sm shadow-sm">
+<span class="material-symbols-outlined text-xl text-amber-400">favorite</span>
+</div>
+<h4 class="font-headline-sm text-body-lg font-bold text-primary mb-1">
+            Why graduating seniors love CampusRelay
+          </h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed mb-space-md">
+            No 50 endless WhatsApp DMs asking “is this available?”, zero awkward price haggling, and crystal-clear pickup deadlines before you catch your flight.
+          </p>
+<div class="flex items-center gap-2 font-label-ticker text-label-ticker text-secondary font-bold">
+<span class="material-symbols-outlined text-sm">verified_user</span>
+<span>BACKED BY STUDENT SENATE CODE OF CONDUCT</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Interactive Toast Notification Container -->
+<div class="fixed bottom-6 right-6 max-w-md bg-inverse-surface text-inverse-on-surface p-4 rounded-xl shadow-2xl flex items-center gap-3 transition-all duration-300 transform translate-y-32 opacity-0 pointer-events-none z-50" id="action-toast">
+<span class="material-symbols-outlined text-amber-400 text-2xl" id="toast-icon">check_circle</span>
+<div class="flex-1">
+<h5 class="font-headline-sm text-body-md font-bold" id="toast-title">Notification</h5>
+<p class="font-body-sm text-body-sm text-inverse-on-surface/80" id="toast-desc">Details of transaction.</p>
+</div>
+<button class="p-1 hover:bg-white/10 rounded" onclick="dismissToast()">
+<span class="material-symbols-outlined text-sm">close</span>
+</button>
+</div>
+</div>
+<script>
+  function showToast(title, desc, icon = 'check_circle') {
+    const toast = document.getElementById('action-toast');
+    const toastTitle = document.getElementById('toast-title');
+    const toastDesc = document.getElementById('toast-desc');
+    const toastIcon = document.getElementById('toast-icon');
+    
+    if (!toast) return;
+    toastTitle.textContent = title;
+    toastDesc.textContent = desc;
+    toastIcon.textContent = icon;
+    
+    toast.classList.remove('translate-y-32', 'opacity-0', 'pointer-events-none');
+    setTimeout(() => {
+      dismissToast();
+    }, 4500);
+  }
+
+  function dismissToast() {
+    const toast = document.getElementById('action-toast');
+    if (toast) {
+      toast.classList.add('translate-y-32', 'opacity-0', 'pointer-events-none');
+    }
+  }
+
+  function selectCategory(btn, cat) {
+    const pills = document.querySelectorAll('.cat-pill');
+    pills.forEach(p => {
+      p.classList.remove('bg-primary', 'text-on-primary', 'shadow-sm', 'ring-2', 'ring-primary/20');
+      p.classList.add('bg-surface-container', 'text-on-surface');
+      const icon = p.querySelector('.material-symbols-outlined');
+      if (icon) {
+        icon.classList.remove('text-amber-400');
+        icon.classList.add('text-secondary');
+      }
+    });
+    btn.classList.remove('bg-surface-container', 'text-on-surface');
+    btn.classList.add('bg-primary', 'text-on-primary', 'shadow-sm', 'ring-2', 'ring-primary/20');
+    const activeIcon = btn.querySelector('.material-symbols-outlined');
+    if (activeIcon) {
+      activeIcon.classList.remove('text-secondary');
+      activeIcon.classList.add('text-amber-400');
+    }
+  }
+
+  function setIncrement(btn, val) {
+    const btns = document.querySelectorAll('.inc-btn');
+    btns.forEach(b => {
+      b.classList.remove('bg-primary', 'text-on-primary', 'shadow-sm');
+      b.classList.add('text-on-surface');
+    });
+    btn.classList.remove('text-on-surface');
+    btn.classList.add('bg-primary', 'text-on-primary', 'shadow-sm');
+    showToast('Increment Updated', 'Minimum counter-bid step set to ₹' + val);
+  }
+
+  function selectDuration(btn) {
+    const pills = document.querySelectorAll('.dur-pill');
+    pills.forEach(p => {
+      p.classList.remove('bg-primary', 'text-on-primary', 'shadow-sm', 'ring-2', 'ring-primary/20');
+      p.classList.add('bg-surface-container-low', 'text-on-surface');
+      const numSpan = p.querySelector('.font-label-numeric');
+      if (numSpan) numSpan.classList.remove('text-amber-400');
+    });
+    btn.classList.remove('bg-surface-container-low', 'text-on-surface');
+    btn.classList.add('bg-primary', 'text-on-primary', 'shadow-sm', 'ring-2', 'ring-primary/20');
+    const activeNum = btn.querySelector('.font-label-numeric');
+    if (activeNum) activeNum.classList.add('text-amber-400');
+  }
+
+  function handleApproveWinning(item, winner, amount) {
+    const actionsBox = document.getElementById('approval-actions-box');
+    if (actionsBox) {
+      actionsBox.innerHTML = `
+        <div class="p-3 bg-amber-500 text-slate-950 font-semibold rounded-lg flex items-center justify-between shadow-sm">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-lg">check_circle</span>
+            <span class="font-body-sm font-bold">Approved &amp; Reserved for ${winner}</span>
+          </div>
+          <span class="font-label-ticker text-xs uppercase font-bold bg-slate-950 text-amber-400 px-2 py-0.5 rounded">OTP: 8392</span>
+        </div>
+        <p class="font-label-caption text-label-caption text-on-surface-variant text-center pt-1">
+          Share OTP with buyer upon physical handover to instantly release ₹${amount}
+        </p>
+      `;
+    }
+    showToast('Price Approved!', `Item reserved for ${winner} at ₹${amount}. Security drop notified.`, 'handshake');
+  }
+
+  function handleRejectWinning(item) {
+    showToast('Bid Rejected', `${item} winning offer declined. Runner-up bidder alerted.`, 'do_not_disturb_on');
+  }
+
+  function handleRelist(item) {
+    showToast('Item Relisted', `${item} has been reset for a 24-hour flash clearance auction.`, 'refresh');
+  }
+
+  function editLiveAuction(item) {
+    showToast('Editing Mode', `Opening live bid parameters for ${item}...`, 'tune');
+  }
+
+  function cancelLiveAuction(item) {
+    const card = document.getElementById('card-jug');
+    if (card) {
+      card.style.opacity = '0.5';
+    }
+    showToast('Auction Cancelled', `${item} auction closed and removed from active bidding.`, 'warning');
+  }
+
+  function triggerPublishListing() {
+    const titleInput = document.getElementById('listing-title');
+    const priceInput = document.getElementById('reserve-price-input');
+    const val = titleInput ? titleInput.value : 'Senior Gear Item';
+    const price = priceInput ? priceInput.value : '400';
+    
+    showToast('Listing Live on CampusRelay!', `"${val}" opened at starting bid ₹${price} with anti-snipe protection.`, 'rocket_launch');
+    if (titleInput) titleInput.value = '';
+  }
+</script></main><footer class="w-full bg-surface-container-low text-on-surface-variant py-space-xl border-t border-surface-container-high"><div class="max-w-7xl mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop"><div class="grid grid-cols-1 md:grid-cols-4 gap-space-lg mb-space-lg"><div><div class="flex items-center gap-space-xs mb-space-sm"><img alt="CampusRelay Logo" class="h-6 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1UUrdg6zozKiKcawUuKY0ZmlVK3yBl0pm7wAn8He0d2AWBmU4XWcKnLRLR44KXwM6IW3wsMjwEVsmhEHdCmcanLzr6fM7RbKiKvUIBA1f9fg-uPzERKx8Mk_WCfkLTkh9c2OSnFk50WSVxc51fjefjdpmna6QKarq8eQi6ss3n5upKwxoxSBsQ5GKwWiDDdNLEpOIiaCfTcz7oJqL1LVsIpVRAdqF50PlyFu01eUPXhJw"/><span class="font-headline-sm text-headline-sm text-primary">CampusRelay</span></div><p class="font-body-sm text-body-sm mb-space-md">Peer-to-peer certified senior exit marketplace with smart escrow holds and anti-sniping bidding mechanisms.</p><div class="flex items-center gap-space-xs font-label-ticker text-label-ticker text-secondary"><span class="material-symbols-outlined text-sm">security</span><span>SENATE SECURED ESCROW</span></div></div><div><h4 class="font-headline-sm text-body-sm text-primary font-bold uppercase tracking-wider mb-space-sm">Active Fair Zones</h4><ul class="space-y-2 font-body-sm text-body-sm"><li><a class="hover:text-secondary transition-colors" data-path="live-auctions" href="#">Hostel 12-14 Quadrangle Fair</a></li><li><a class="hover:text-secondary transition-colors" data-path="live-auctions" href="#">Mech Engg Lab Equipment Bids</a></li><li><a class="hover:text-secondary transition-colors" data-path="live-auctions" href="#">Gymkhana Sports Gear Lot</a></li><li><a class="hover:text-secondary transition-colors" data-path="live-auctions" href="#">Library Stacks Notes Relay</a></li></ul></div><div><h4 class="font-headline-sm text-body-sm text-primary font-bold uppercase tracking-wider mb-space-sm">Safety &amp; Handover</h4><ul class="space-y-2 font-body-sm text-body-sm"><li><a class="hover:text-secondary transition-colors" data-path="handover-and-escrow" href="#">OTP In-Person Verification</a></li><li><a class="hover:text-secondary transition-colors" data-path="handover-and-escrow" href="#">Escrow Payout Timeline</a></li><li><a class="hover:text-secondary transition-colors" data-path="watchlist-and-alerts" href="#">Anti-Snipe Bid Extensions</a></li><li><a class="hover:text-secondary transition-colors" data-path="handover-and-escrow" href="#">Campus Security Drop Points</a></li></ul></div><div><h4 class="font-headline-sm text-body-sm text-primary font-bold uppercase tracking-wider mb-space-sm">IITB Student Helpdesk</h4><p class="font-body-sm text-body-sm mb-space-sm">Need urgent hostel room clearance handover before convocation?</p><a class="inline-flex items-center gap-1 font-body-sm text-body-sm font-semibold text-secondary hover:text-primary transition-colors" data-path="ai-assistant" href="#"><span>Talk to AI Assistant</span><span class="material-symbols-outlined text-sm">arrow_forward</span></a></div></div><div class="pt-space-md border-t border-outline-variant/30 flex flex-col md:flex-row items-center justify-between gap-space-sm font-label-caption text-label-caption text-on-surface-variant"><p>© 2024 CampusRelay Student Commerce Collective. All university senior exit transactions bonded under campus escrow.</p><div class="flex items-center gap-space-md"><span class="font-label-ticker text-label-ticker text-primary bg-secondary-fixed px-2 py-0.5 rounded-full font-bold">STATUS: 100% OPERATIONAL</span><span>IIT Bombay SAC Sanctioned</span></div></div></div></footer></body></html>
