@@ -9,7 +9,7 @@ const notificationSchema = new Schema(
     },
     type: {
       type: String,
-      enum: ['outbid', 'auction_closed', 'system'],
+      enum: ['outbid', 'auction_closed', 'system', 'wanted_match', 'new_question', 'question_answered'],
       required: true,
     },
     payload: {

@@ -21,6 +21,8 @@ export default function AuctionDetail() {
   const [bidAmount, setBidAmount] = useState('');
   const [autoBidMax, setAutoBidMax] = useState('');
   const [questionText, setQuestionText] = useState('');
+  const [questions, setQuestions] = useState([]);
+  const [answerTexts, setAnswerTexts] = useState({});
   const [submittingBid, setSubmittingBid] = useState(false);
   const [submittingAuto, setSubmittingAuto] = useState(false);
   const [submittingQ, setSubmittingQ] = useState(false);
@@ -28,16 +30,28 @@ export default function AuctionDetail() {
   const [msLeft, setMsLeft] = useState(0);
 
   const token = localStorage.getItem('token');
-  const userId = localStorage.getItem('userId');
+
+  // Derive current user id from the JWT (robust; falls back to stored userId)
+  let userId = null;
+  if (token) {
+    try {
+      let b64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+      while (b64.length % 4) b64 += '=';
+      userId = JSON.parse(atob(b64)).userId;
+    } catch { /* ignore */ }
+  }
+  if (!userId) userId = localStorage.getItem('userId');
 
   const fetchDetails = useCallback(async () => {
     try {
-      const [aucRes, bidsRes] = await Promise.all([
+      const [aucRes, bidsRes, qRes] = await Promise.all([
         axios.get(`/api/auctions/${id}`),
         axios.get(`/api/auctions/${id}/bids`),
+        axios.get(`/api/questions/${id}`),
       ]);
       setAuction(aucRes.data);
       setBids(Array.isArray(bidsRes.data) ? bidsRes.data : []);
+      setQuestions(Array.isArray(qRes.data) ? qRes.data : []);
     } catch (e) {
       console.error(e);
     } finally {
@@ -118,7 +132,7 @@ export default function AuctionDetail() {
     if (!token) { navigate('/login'); return; }
     setSubmittingQ(true);
     try {
-      await axios.post(`/api/auctions/${id}/questions`, { text: questionText }, {
+      await axios.post(`/api/questions/${id}`, { text: questionText }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setQuestionText('');
@@ -128,6 +142,20 @@ export default function AuctionDetail() {
       showBidMsg('error', err.response?.data?.message || 'Failed to submit question');
     } finally {
       setSubmittingQ(false);
+    }
+  };
+
+  const handleAnswer = async (qid) => {
+    const answer = (answerTexts[qid] || '').trim();
+    if (!answer) return;
+    try {
+      await axios.post(`/api/questions/${qid}/answer`, { answer }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setAnswerTexts(prev => ({ ...prev, [qid]: '' }));
+      fetchDetails();
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to post answer');
     }
   };
 
@@ -149,7 +177,6 @@ export default function AuctionDetail() {
     </div>
   );
 
-  const questions = auction.questions || [];
   const photos = auction.photos || [];
 
   return (
@@ -251,14 +278,40 @@ export default function AuctionDetail() {
                 {questions.length === 0 ? (
                   <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>No questions yet. Be the first to ask!</div>
                 ) : (
-                  questions.map((q, i) => (
-                    <div key={i} style={{ padding: '0.75rem 1rem', background: 'var(--bg-primary)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)' }}>
+                  questions.map((q) => (
+                    <div key={q._id} style={{ padding: '0.75rem 1rem', background: 'var(--bg-primary)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)' }}>
                       <div style={{ fontSize: '0.85rem', color: 'var(--text-primary)', fontWeight: 600, marginBottom: '0.25rem' }}>
                         Q: {q.text}
                       </div>
-                      {q.answer && (
-                        <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                          A: {q.answer}
+                      <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: '0.35rem' }}>
+                        — {q.askerId?.name || 'Anonymous bidder'} · {new Date(q.createdAt).toLocaleString()}
+                      </div>
+                      {q.answer ? (
+                        <div style={{
+                          fontSize: '0.8rem', color: 'var(--text-primary)',
+                          background: 'rgba(74,222,128,0.08)', borderLeft: '3px solid var(--accent-green, #4ade80)',
+                          padding: '0.5rem 0.75rem', borderRadius: 'var(--radius-sm)',
+                        }}>
+                          <strong style={{ color: 'var(--accent-green, #4ade80)' }}>Seller:</strong> {q.answer}
+                        </div>
+                      ) : isSeller ? (
+                        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.35rem' }}>
+                          <input
+                            className="form-input"
+                            placeholder="Write your answer (visible to everyone)…"
+                            value={answerTexts[q._id] || ''}
+                            onChange={(e) => setAnswerTexts(prev => ({ ...prev, [q._id]: e.target.value }))}
+                            onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAnswer(q._id); } }}
+                            style={{ flex: 1, fontSize: '0.85rem' }}
+                          />
+                          <button
+                            className="btn btn-primary btn-sm"
+                            onClick={() => handleAnswer(q._id)}
+                          >Reply</button>
+                        </div>
+                      ) : (
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
+                          Awaiting seller's answer…
                         </div>
                       )}
                     </div>

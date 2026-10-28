@@ -4,6 +4,8 @@ import { upload } from '../middleware/upload.js';
 import { placeBid, checkExtension } from '../services/bidService.js';
 import Auction from '../models/Auction.js';
 import Bid from '../models/Bid.js';
+import Wanted from '../models/Wanted.js';
+import Notification from '../models/Notification.js';
 
 const router = express.Router();
 
@@ -108,6 +110,31 @@ router.post('/', authMiddleware, upload.array('photos', 3), async (req, res) => 
     });
 
     res.status(201).json(auction);
+
+    // Fire-and-forget: notify users whose Wanted alerts match this listing
+    try {
+      const titleLower = (title || '').toLowerCase();
+      const wantedAlerts = await Wanted.find({ active: true, userId: { $ne: req.user.userId } });
+      for (const w of wantedAlerts) {
+        const kwMatch = (w.keywords || []).some((k) => k && titleLower.includes(k.toLowerCase().trim()));
+        const catMatch = w.category && w.category === category;
+        const priceOk = !w.maxPrice || Number(startPrice) <= w.maxPrice;
+        if ((kwMatch || catMatch) && priceOk) {
+          await Notification.create({
+            userId: w.userId,
+            type: 'wanted_match',
+            payload: {
+              auctionId: auction._id,
+              title: auction.title,
+              startPrice: auction.startPrice,
+              message: `New listing matches your wanted alert: ${auction.title}`,
+            },
+          });
+        }
+      }
+    } catch (notifyErr) {
+      console.error('Wanted match notification failed:', notifyErr.message);
+    }
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

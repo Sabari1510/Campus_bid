@@ -16,6 +16,14 @@ connectDB();
 
 const PORT = process.env.PORT || 5000;
 
+// Global crash protection — log and keep running instead of dying
+process.on('uncaughtException', (err) => {
+  console.error('[UNCAUGHT_EXCEPTION]', err);
+});
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('[UNHANDLED_REJECTION]', reason);
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

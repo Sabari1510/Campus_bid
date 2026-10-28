@@ -17,7 +17,8 @@ app.use((req, res, next) => {
   next();
 });
 app.use(helmet());
-app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 100 }));
+// Live polling (3 requests every 4s per tab) burns through small limits fast
+app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 2000 }));
 app.use(cookieParser());
 app.use('/uploads', express.static('uploads'));
 

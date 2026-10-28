@@ -17,6 +17,7 @@ export default function Login() {
       const res = await axios.post('/api/auth/login', { email, password });
       localStorage.setItem('token', res.data.token);
       if (res.data.user?.id) localStorage.setItem('userId', res.data.user.id);
+      window.dispatchEvent(new Event('auth-change'));
       navigate('/');
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed. Check your credentials.');

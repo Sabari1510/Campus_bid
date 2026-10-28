@@ -27,7 +27,7 @@ export default function CreateListing() {
   }, []);
 
   const handleFileChange = (e) => {
-    const valid = Array.from(e.target.files)
+    const incoming = Array.from(e.target.files)
       .filter(f => f.type.startsWith('image/'))
       .filter(f => {
         if (f.size > 5 * 1024 * 1024) {
@@ -35,10 +35,25 @@ export default function CreateListing() {
           return false;
         }
         return true;
-      })
-      .slice(0, 3);
-    if (valid.length > 0) setError('');
-    setPhotos(valid);
+      });
+
+    // Append to existing selection, up to 3 total
+    const merged = [...photos];
+    let overflow = false;
+    for (const f of incoming) {
+      if (merged.length >= 3) { overflow = true; break; }
+      if (!merged.some(p => p.name === f.name && p.size === f.size)) merged.push(f);
+    }
+    if (overflow) setError('Maximum 3 photos — extra files were skipped');
+    else if (merged.length > 0) setError('');
+
+    setPhotos(merged);
+    e.target.value = ''; // allow re-selecting the same file
+  };
+
+  const removePhoto = (idx) => {
+    setPhotos(photos.filter((_, i) => i !== idx));
+    setError('');
   };
 
   const handleCreate = async (e) => {
@@ -155,9 +170,12 @@ export default function CreateListing() {
             </h2>
 
             <input ref={fileRef} type="file" multiple accept="image/*" onChange={handleFileChange} style={{ display: 'none' }} id="cl-photos" />
-            <button type="button" className="btn btn-ghost" onClick={() => fileRef.current?.click()}>
-              📷 Choose Photos
+            <button type="button" className="btn btn-ghost" onClick={() => fileRef.current?.click()} disabled={photos.length >= 3}>
+              📷 {photos.length >= 3 ? 'Max 3 photos added' : 'Choose Photos'}
             </button>
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginLeft: '0.5rem' }}>
+              {photos.length}/3 selected
+            </span>
 
             {photos.length > 0 && (
               <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem', flexWrap: 'wrap' }}>
@@ -168,6 +186,17 @@ export default function CreateListing() {
                       alt={`Preview ${i + 1}`}
                       style={{ width: 100, height: 75, objectFit: 'cover', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)' }}
                     />
+                    <button
+                      type="button"
+                      onClick={() => removePhoto(i)}
+                      style={{
+                        position: 'absolute', top: -6, right: -6, width: 20, height: 20,
+                        borderRadius: '50%', border: 'none', cursor: 'pointer',
+                        background: '#ef4444', color: '#fff', fontSize: '0.7rem', fontWeight: 700,
+                        lineHeight: '20px', padding: 0,
+                      }}
+                      title="Remove photo"
+                    >✕</button>
                     <span style={{ position: 'absolute', bottom: 2, right: 4, fontSize: '0.65rem', color: 'var(--text-muted)' }}>
                       {(p.size / 1024).toFixed(0)}KB
                     </span>
