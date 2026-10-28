@@ -20,13 +20,13 @@ app.use(cookieParser());
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 
 // Mount routes
-import authRoutes from '../routes/auth.routes.js';
-import auctionRoutes from '../routes/auction.routes.js';
-import bidRoutes from '../routes/bid.routes.js';
-import questionRoutes from '../routes/question.routes.js';
-import wantedRoutes from '../routes/wanted.routes.js';
-import notificationRoutes from '../routes/notification.routes.js';
-import aiRoutes from '../routes/ai.routes.js';
+import authRoutes from './routes/auth.routes.js';
+import auctionRoutes from './routes/auction.routes.js';
+import bidRoutes from './routes/bid.routes.js';
+import questionRoutes from './routes/question.routes.js';
+import wantedRoutes from './routes/wanted.routes.js';
+import notificationRoutes from './routes/notification.routes.js';
+import aiRoutes from './routes/ai.routes.js';
 
 app.use('/api/auth', authRoutes);
 app.use('/api/auctions', auctionRoutes);
