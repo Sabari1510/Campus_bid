@@ -79,10 +79,24 @@ export const resolveAutoBid = async (auctionId, currentUserId, currentAmount) =>
   }
 
   const competingMax = competingMaxes[0];
-  const newBidAmount = Math.min(competingMax.maxAmount, currentAmount + auction.minIncrement);
+  
+  const nextMinToOutbid = currentAmount + (auction.minIncrement || 10);
+  let autoBidAmount = nextMinToOutbid;
 
-  // Place the minimum bid needed to stay in lead
-  await placeBid(auctionId, currentUserId, newBidAmount, true);
+  // If the competing max is higher, our auto-bid might need to be higher
+  if (competingMax.maxAmount >= nextMinToOutbid) {
+    autoBidAmount = Math.min(competingMax.maxAmount + (auction.minIncrement || 10), userAutoBid.maxAmount);
+  } else {
+    // Competing max is lower than our next min, so we bid our next min
+    autoBidAmount = Math.min(nextMinToOutbid, userAutoBid.maxAmount);
+  }
+
+  // Ensure we actually outbid and don't exceed our own max
+  if (autoBidAmount <= currentAmount || autoBidAmount > userAutoBid.maxAmount) {
+    return; // Cannot outbid within our max, or already leading, or competing max is too low
+  }
+
+  await placeBid(auctionId, currentUserId, autoBidAmount, true);
 };
 
 export const checkExtension = async (auctionId) => {

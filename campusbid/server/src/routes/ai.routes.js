@@ -285,7 +285,7 @@ router.post('/actions/:id/confirm', authMiddleware, async (req, res) => {
     await aiAction.save();
 
     res.json({
-      message: `Confirmed! Your proxy is active on "${auction.title}" — capped at ₹${aiAction.maxAmount}. Opening bid ₹${cappedBid} placed.`,
+      message: `Confirmed! Your auto-bid proxy is now set on "${auction.title}" with a maximum limit of ₹${aiAction.maxAmount}. An initial bid of ₹${cappedBid} has been placed to take the lead.`,
       bid: bid.bid,
       auction: { _id: auction._id, title: auction.title, currentPrice: auction.currentPrice },
     });
