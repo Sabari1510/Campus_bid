@@ -40,15 +40,17 @@ const Assistant = () => {
     } catch (err) {
       // Fallback search directly on API if AI endpoint is cut or pending
       try {
-        const searchRes = await axios.get('/api/auctions', { params: { q } });
+        const cleanKey = q.replace(/(?:find|me|a|show|under|below|how|many|are|listed|books|cycles|book|cycle|₹|rs|\d+)/gi, '').trim() 
+                         || (q.toLowerCase().includes('cycle') ? 'cycle' : q.toLowerCase().includes('book') ? 'book' : q);
+        const searchRes = await axios.get('/api/auctions', { params: { q: cleanKey } });
         const list = Array.isArray(searchRes.data) ? searchRes.data : [];
         setMessages(prev => [
           ...prev,
           {
             sender: 'assistant',
             text: list.length > 0 
-              ? `Found ${list.length} active listings matching "${q}":`
-              : `No exact matches found for "${q}". Try browsing all active auctions on the Home page.`,
+              ? `Found ${list.length} active listing${list.length > 1 ? 's' : ''}:`
+              : `No active auctions found matching "${q}". Try browsing all active auctions on the Home page.`,
             results: list
           }
         ]);
