@@ -12,13 +12,22 @@ const router = express.Router();
 // Get all auctions with filters (Public)
 router.get('/', async (req, res) => {
   try {
-    const { q, category, condition, min, max, closingSoon, sellerId } = req.query;
+    const { q, category, condition, min, max, closingSoon, sellerId, status } = req.query;
+    const now = new Date();
     let filter = {};
 
     if (sellerId) {
       filter.sellerId = sellerId;
+      if (status === 'CLOSED') {
+        filter.$or = [{ status: 'CLOSED' }, { closesAt: { $lte: now } }];
+      }
+    } else if (status === 'CLOSED') {
+      // Closed: explicitly closed, or expired but not yet swept
+      filter.$or = [{ status: 'CLOSED' }, { closesAt: { $lte: now } }];
     } else {
+      // Live: active AND not yet expired
       filter.status = 'ACTIVE';
+      filter.closesAt = { $gt: now };
     }
 
     if (q) {

@@ -41,9 +41,11 @@ export default function Home() {
   const [category, setCategory] = useState('All');
   const [condition, setCondition] = useState('All');
 
+  const [tab, setTab] = useState('ACTIVE');
+
   const fetchAuctions = useCallback(async () => {
     try {
-      const params = { status: 'ACTIVE' };
+      const params = { status: tab };
       if (search) params.q = search;
       if (category !== 'All') params.category = category;
       if (condition !== 'All') params.condition = condition;
@@ -54,7 +56,7 @@ export default function Home() {
     } finally {
       setLoading(false);
     }
-  }, [search, category, condition]);
+  }, [search, category, condition, tab]);
 
   useEffect(() => {
     fetchAuctions();
@@ -110,6 +112,22 @@ export default function Home() {
             <div className="hero-stat-label">Platform Fee</div>
           </div>
         </div>
+      </div>
+
+      {/* Live / Closed Tabs */}
+      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+        <button
+          className={`btn btn-sm ${tab === 'ACTIVE' ? 'btn-primary' : 'btn-ghost'}`}
+          onClick={() => { setTab('ACTIVE'); setLoading(true); }}
+        >
+          🔴 Live Lots
+        </button>
+        <button
+          className={`btn btn-sm ${tab === 'CLOSED' ? 'btn-primary' : 'btn-ghost'}`}
+          onClick={() => { setTab('CLOSED'); setLoading(true); }}
+        >
+          🔒 Closed
+        </button>
       </div>
 
       {/* Filter Bar */}

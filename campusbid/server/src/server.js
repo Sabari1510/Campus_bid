@@ -10,6 +10,7 @@ dotenv.config({ path: path.resolve(__dirname, '../.env') });
 import connectDB from '../config/db.js';
 import { validateEnv } from '../config/env.js';
 import app from './app.js';
+import { startCloseJob } from './jobs/closeExpiredAuctions.js';
 
 validateEnv();
 connectDB();
@@ -26,4 +27,5 @@ process.on('unhandledRejection', (reason, promise) => {
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+  startCloseJob();
 });
