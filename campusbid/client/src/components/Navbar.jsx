@@ -102,6 +102,9 @@ export default function Navbar() {
             <Link to="/wanted" className={`nav-link ${isActive('/wanted') ? 'active' : ''}`}>
               🎯 Wanted
             </Link>
+            <Link to="/assistant" className={`nav-link ${isActive('/assistant') ? 'active' : ''}`}>
+              🤖 Assistant
+            </Link>
 
             {user ? (
               <>

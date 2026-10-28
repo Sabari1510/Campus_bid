@@ -6,6 +6,7 @@ import Auction from '../models/Auction.js';
 import Bid from '../models/Bid.js';
 import Wanted from '../models/Wanted.js';
 import Notification from '../models/Notification.js';
+import AutoBid from '../models/AutoBid.js';
 
 const router = express.Router();
 
@@ -201,18 +202,33 @@ router.post('/:id/bids', authMiddleware, async (req, res) => {
   }
 });
 
-// Set auto-bid max
+// Set auto-bid proxy (proper: AutoBid record + real bid through placeBid rules)
 router.put('/:id/autobid', authMiddleware, async (req, res) => {
   try {
-    const { maxAmount } = req.body;
-    const autobid = await Auction.findOneAndUpdate(
-      { _id: req.params.id, status: 'ACTIVE' },
-      { $set: { currentPrice: maxAmount } }, // Simplified auto-bid handling
-      { new: true }
+    const auction = await Auction.findById(req.params.id);
+    if (!auction || auction.status !== 'ACTIVE' || new Date() >= auction.closesAt) {
+      return res.status(400).json({ message: 'Auction is not live' });
+    }
+    if (auction.sellerId.toString() === req.user.userId.toString()) {
+      return res.status(403).json({ message: "You can't auto-bid on your own listing" });
+    }
+
+    const maxAmount = Number(req.body.maxAmount);
+    const nextMin = auction.currentPrice + (auction.minIncrement || 10);
+    if (!maxAmount || maxAmount < nextMin) {
+      return res.status(400).json({ message: `Max amount must be at least ₹${nextMin}` });
+    }
+
+    await AutoBid.findOneAndUpdate(
+      { auctionId: auction._id, userId: req.user.userId },
+      { maxAmount },
+      { upsert: true, new: true }
     );
-    res.json(autobid);
+
+    const bid = await placeBid(auction._id, req.user.userId, nextMin, true);
+    res.json({ message: `Auto-bid active, capped at ₹${maxAmount}`, bid: bid.bid });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(400).json({ message: error.message });
   }
 });
 

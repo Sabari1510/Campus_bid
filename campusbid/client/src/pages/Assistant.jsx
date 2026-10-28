@@ -72,14 +72,22 @@ const Assistant = () => {
       return;
     }
     try {
-      await axios.put(`/api/auctions/${proposal.auctionId}/autobid`, {
-        maxAmount: proposal.maxAmount
-      }, {
+      const res = await axios.post(`/api/ai/actions/${proposal.id}/confirm`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      alert(`Auto-bid confirmed! Your max budget is capped at ₹${proposal.maxAmount}.`);
+      setMessages(prev => [...prev, {
+        sender: 'assistant',
+        text: `✅ ${res.data.message}`,
+        results: null,
+        proposal: null
+      }]);
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to confirm auto-bid');
+      setMessages(prev => [...prev, {
+        sender: 'assistant',
+        text: `⚠️ ${err.response?.data?.message || 'Failed to confirm action'}`,
+        results: null,
+        proposal: null
+      }]);
     }
   };
 
